@@ -39,6 +39,10 @@ Parameters:
 
 - `yaml_text` — YAML defining the object
 
+### After Creation: Display the UI Link
+
+After a successful `create_entity` or `create_object` call, the response includes a `ui_url` field. **Always display this URL to the user** so they can quickly open the object in the Honeydew application.
+
 ---
 
 ## Decision Flow

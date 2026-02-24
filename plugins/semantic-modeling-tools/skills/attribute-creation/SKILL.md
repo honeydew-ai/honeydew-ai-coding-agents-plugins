@@ -69,6 +69,10 @@ folder: <optional folder path>
 
 > **Minimal diff rule:** When updating, preserve the existing field order and formatting from the current YAML. Only change the fields you need to modify. Objects are versioned in git, so unnecessary reordering or reformatting creates noisy diffs.
 
+### After Creation/Update: Display the UI Link
+
+After a successful `create_object` or `update_object` call, the response includes a `ui_url` field. **Always display this URL to the user** so they can quickly open the object in the Honeydew application.
+
 ### Delete: delete_object
 
 1. Use `search_model` to find the attribute's `object_key`.

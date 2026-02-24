@@ -279,6 +279,10 @@ Returns:
 - Suggested follow-up questions
 - `conversation_id` for continuing the conversation
 
+### After Deep Analysis: Display the UI Link
+
+After a successful `ask_deep_analysis_question` call, the response includes a `ui_url` field. **Always display this URL to the user** so they can view the full analysis in the Honeydew application.
+
 ### Follow-up Questions
 
 Use `conversation_id` from the previous response to ask follow-up questions that build on the prior analysis:

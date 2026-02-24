@@ -32,6 +32,10 @@ Call `update_object` with:
 
 Required permission: Editor or higher.
 
+### After Creation/Update: Display the UI Link
+
+After a successful `update_object` call, the response includes a `ui_url` field. **Always display this URL to the user** so they can quickly open the object in the Honeydew application.
+
 ### Remove a Relation: update_object
 
 There is no `delete_object` for relations. To remove a relation, update the source entity's YAML with the relation removed from the `relations:` block.
