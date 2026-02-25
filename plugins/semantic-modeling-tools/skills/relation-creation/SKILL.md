@@ -135,7 +135,6 @@ See `honeydew-validate` skill for:
 ```yaml
 type: perspective
 name: validate_relation
-entity: <source_entity>
 attributes:
   - <target_entity>.<attribute>
 metrics:

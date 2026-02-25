@@ -27,7 +27,6 @@ Call `preview_data_from_yaml` with:
 ```yaml
 type: perspective
 name: validate_metric
-entity: <entity_name>
 metrics:
   - <entity>.<metric_name>
 ```
@@ -178,7 +177,6 @@ Call `preview_data_from_yaml` with:
 ```yaml
 type: perspective
 name: validate_relation
-entity: <source_entity>
 attributes:
   - <target_entity>.<attribute>
 metrics:
