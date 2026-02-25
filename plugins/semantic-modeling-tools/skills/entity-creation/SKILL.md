@@ -20,6 +20,17 @@ When creating an entity you are answering three questions:
 
 ## Creation Methods
 
+### Quick Import: import_tables
+
+Use `import_tables` to quickly import one or more data warehouse tables into the semantic model.
+Each table becomes an entity with its columns automatically mapped as attributes. This is the fastest way to bootstrap entities when you don't need custom YAML.
+
+Parameters:
+
+- `tables` — List of fully qualified table names in the format `<database>.<schema>.<table>`
+
+Best for: bulk imports, quick prototyping, or when the default column-to-attribute mapping is sufficient.
+
 ### Primary: create_entity (Recommended)
 
 Unlike metrics and attributes, entity creation always requires YAML — there is no simplified single-expression API. `create_entity` is the preferred MCP tool because it creates both the entity and its dataset in a **single operation**.
@@ -50,8 +61,11 @@ After a successful `create_entity` or `create_object` call, the response include
 ```
 Need to create an entity?
     │
+    ├─► Quick import from warehouse table(s)? Default mapping is fine?
+    │       └─► Use import_tables ✓ (fastest)
+    │
     ├─► New entity + dataset together (most common)?
-    │       └─► Use create_entity ✓
+    │       └─► Use create_entity ✓ (full control)
     │
     ├─► Adding a second dataset to existing entity?
     │       └─► Use create_object with dataset YAML only
@@ -117,7 +131,6 @@ See `honeydew-validate` skill for:
 ```yaml
 type: perspective
 name: validate_entity
-entity: <entity_name>
 metrics:
   - <entity>.count
 ```

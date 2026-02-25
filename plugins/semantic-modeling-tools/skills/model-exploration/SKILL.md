@@ -83,7 +83,6 @@ Call `preview_data_from_yaml` with a YAML perspective definition:
 ```yaml
 type: perspective
 name: my_query
-entity: order_header
 attributes:
   - order_header.order_year_month
 metrics:
