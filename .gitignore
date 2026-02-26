@@ -22,5 +22,5 @@ venv/
 .env
 .env.local
 
-# Claude
+# Agent settings
 **/settings.local.json

@@ -5,7 +5,7 @@
     "email": "support@honeydew.ai"
   },
   "metadata": {
-    "description": "Honeydew AI plugins for Claude Code - skills and tools powered by the Honeydew AI MCP",
+    "description": "Honeydew AI plugins for coding agents - skills and tools powered by the Honeydew AI MCP",
     "version": "0.1.1"
   },
   "plugins": [
