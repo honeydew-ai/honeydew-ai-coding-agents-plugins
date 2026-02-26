@@ -1,0 +1,25 @@
+# Changelog
+
+All notable changes to the Honeydew AI Claude Plugins are documented in this file.
+
+## [0.1.1] - 2026-02-25
+
+### Added
+
+- `import_tables` tool as a new entity creation method in the entity-creation skill
+
+## [0.1.0] - 2026-02-24
+
+### Added
+
+- Plugin marketplace setup with `marketplace.json`
+- **Semantic Modeling Tools** plugin with 6 skills:
+  - **model-exploration** — explore entities, search fields, inspect relationships
+  - **entity-creation** — create entities from data warehouse tables
+  - **relation-creation** — define joins between entities with type, cardinality, and conditions
+  - **attribute-creation** — create calculated attributes (dimensions) with SQL expressions
+  - **metric-creation** — create business metrics (aggregations) like totals, averages, and ratios
+  - **validation** — post-creation validation with type-specific sanity checks
+- **Data Analysis Tools** plugin with 2 skills:
+  - **query** — structured YAML perspectives, natural language questions, and deep analysis
+  - **filtering** — advanced filter syntax for comparisons, dates, nulls, and full-text search
