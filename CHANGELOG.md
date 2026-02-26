@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Honeydew AI Claude Plugins are documented in this file.
+All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
 ## [0.1.1] - 2026-02-25
 
