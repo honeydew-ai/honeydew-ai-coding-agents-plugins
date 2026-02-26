@@ -4,7 +4,7 @@ Skills and tools powered by the [Honeydew MCP](https://github.com/honeydew-ai/ho
 
 ## Prerequisites
 
-- A coding agent that supports plugins/skills (e.g., [Claude Code](https://docs.anthropic.com/en/docs/claude-code), or any agent with MCP support)
+- A coding agent that supports plugins/skills (e.g., [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.com), or any agent with MCP support)
 - A Honeydew AI workspace with the [Honeydew MCP server](https://github.com/honeydew-ai/honeydew-mcp) configured
 
 ## Installation
@@ -12,6 +12,21 @@ Skills and tools powered by the [Honeydew MCP](https://github.com/honeydew-ai/ho
 ### Claude Code
 
 Add this marketplace to Claude Code:
+
+```
+/plugin marketplace add honeydew-ai/honeydew-ai-claude-plugins
+```
+
+Then install the plugins you need:
+
+```
+/plugin install semantic-modeling-tools@honeydew-ai
+/plugin install data-analysis-tools@honeydew-ai
+```
+
+### Cursor
+
+Add this marketplace to Cursor:
 
 ```
 /plugin marketplace add honeydew-ai/honeydew-ai-claude-plugins
