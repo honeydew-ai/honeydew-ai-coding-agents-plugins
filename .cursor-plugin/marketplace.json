@@ -1,12 +1,13 @@
 {
-  "name": "honeydew-ai-plugins",
+  "name": "honeydew-ai-cursor-plugins",
   "owner": {
     "name": "Honeydew AI",
     "email": "support@honeydew.ai"
   },
   "metadata": {
     "description": "Honeydew AI plugins for coding agents - skills and tools powered by the Honeydew AI MCP",
-    "version": "0.1.1"
+    "version": "0.1.1",
+    "pluginRoot": "plugins"
   },
   "plugins": [
     {
@@ -15,8 +16,10 @@
       "description": "Tools for semantic modeling with Honeydew AI",
       "version": "0.1.1",
       "author": {
-        "name": "Honeydew AI"
-      }
+        "name": "Honeydew AI",
+        "email": "support@honeydew.ai"
+      },
+      "license": "Apache-2.0"
     },
     {
       "name": "data-analysis-tools",
@@ -24,8 +27,10 @@
       "description": "Tools for data analysis with Honeydew AI",
       "version": "0.1.1",
       "author": {
-        "name": "Honeydew AI"
-      }
+        "name": "Honeydew AI",
+        "email": "support@honeydew.ai"
+      },
+      "license": "Apache-2.0"
     }
   ]
 }

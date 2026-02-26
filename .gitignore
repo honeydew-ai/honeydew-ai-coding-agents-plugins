@@ -22,5 +22,9 @@ venv/
 .env
 .env.local
 
+# Temp
+tmp/
+temp/
+
 # Agent settings
 **/settings.local.json
