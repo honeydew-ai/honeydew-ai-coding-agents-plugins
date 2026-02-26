@@ -1,13 +1,15 @@
-# Honeydew AI Claude Plugins
+# Honeydew AI Plugins for Coding Agents
 
-A Claude Code plugin marketplace for [Honeydew AI](https://honeydew.ai) — skills and tools powered by the Honeydew MCP that help you build semantic models and analyze data through natural conversation.
+Skills and tools powered by the [Honeydew MCP](https://honeydew.ai/docs/integration/mcp) that help coding agents build semantic models and analyze data through natural conversation.
 
 ## Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) CLI installed
-- A Honeydew AI workspace with the [Honeydew MCP server](https://github.com/honeydew-ai/honeydew-mcp) configured
+- A coding agent that supports plugins/skills (e.g., [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.com), or any agent with MCP support)
+- A Honeydew AI workspace with the [Honeydew MCP server](https://honeydew.ai/docs/integration/mcp) configured
 
 ## Installation
+
+### Claude Code
 
 Add this marketplace to Claude Code:
 
@@ -21,6 +23,15 @@ Then install the plugins you need:
 /plugin install semantic-modeling-tools@honeydew-ai
 /plugin install data-analysis-tools@honeydew-ai
 ```
+
+### Cursor
+
+1. Go to Cursor Settings -> Rules, Skills, Subagents and click on **+New** next to Rules.
+2. Select **Add from GitHub** and enter provide the url of this repository.
+
+### Other Coding Agents
+
+For coding agents that support MCP, configure the [Honeydew MCP server](https://honeydew.ai/docs/integration/mcp) and use the skill files in this repository as prompts or instructions. The skills are written as agent-agnostic markdown documentation that any coding agent can consume.
 
 ## Available Plugins
 
