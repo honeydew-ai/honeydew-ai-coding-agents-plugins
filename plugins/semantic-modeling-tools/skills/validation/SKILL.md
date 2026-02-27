@@ -1,6 +1,6 @@
 ---
 name: validation
-description: Use after creating or modifying ANY Honeydew object (metric, attribute, entity, relation). Provides type-specific validation logic to ensure objects work correctly and return sensible results.
+description: Use after creating or modifying ANY Honeydew object (metric, attribute, entity, domain). Provides type-specific validation logic to ensure objects work correctly and return sensible results.
 ---
 
 ## Overview
@@ -162,17 +162,17 @@ attributes:
 - Zero rows returned
 - Key column has duplicates (for non-fact tables)
 
----
+#### Validating Relations (part of entity validation)
 
-### Relations
+Relations are not standalone objects — they are defined within an entity's YAML. Validate them as part of the entity that contains them.
 
-**Step 1: Verify relation was created**
+**Step 1: Verify relation exists**
 
 Use `get_entity` on the source entity and check its relations list for the new relation.
 
 **Step 2: Test the join works**
 
-Call `preview_data_from_yaml` with:
+Call `preview_data_from_yaml` with a cross-entity query:
 
 ```yaml
 type: perspective
@@ -194,10 +194,55 @@ metrics:
 
 **Alert user if:**
 
-- Relation not created
+- Relation not found on the entity
 - Cross-entity query fails
 - Row count explodes (indicates wrong cardinality)
 - All joined values are NULL (bad join condition)
+
+---
+
+### Domains
+
+**Step 1: Verify domain exists**
+
+Use `search_model` to find the new domain by name.
+
+**Step 2: Test with a scoped query**
+
+Call `preview_data_from_yaml` with the `domain` parameter to verify entities are accessible and filters apply:
+
+```yaml
+type: perspective
+name: validate_domain
+domain: <domain_name>
+metrics:
+  - <entity>.count
+```
+
+**Step 3: Verify filters apply**
+
+If the domain has semantic or source filters, compare results with and without the domain to confirm filters reduce the data as expected:
+
+- Query a metric **with** the domain set — note the result.
+- Query the same metric **without** the domain — note the result.
+- The domain-scoped result should be less than or equal to the unscoped result (for filters that restrict rows).
+
+**Step 4: Sanity checks**
+
+| Check                | What to Look For                            | Action if Failed                              |
+| -------------------- | ------------------------------------------- | --------------------------------------------- |
+| Domain exists        | Found via `search_model`                    | Check `create_object` call and YAML syntax    |
+| Entities accessible  | Scoped query returns data                   | Verify entity names match existing entities   |
+| Filters apply        | Scoped count <= unscoped count              | Check filter SQL and entity.field references  |
+| Field selectors work | Excluded fields not returned in query       | Verify selector patterns and order            |
+| No errors            | Query executes without compilation errors   | Check filter SQL syntax, fully qualified refs |
+
+**Alert user if:**
+
+- Domain not found after creation
+- Scoped query returns an error (likely bad filter SQL or missing entity)
+- Filters have no effect (scoped count equals unscoped count when a filter is expected to reduce rows)
+- Excluded fields are still accessible (field selector not applied correctly)
 
 ---
 
@@ -244,4 +289,5 @@ Do not silently fix issues — always surface findings and ask before making cha
 | Metric    | `preview_data_from_yaml` with metrics list    | Value, magnitude, sign, consistency |
 | Attribute | `preview_data_from_yaml` with attributes list | Range, distribution, NULLs          |
 | Entity    | `list_entities` + `preview_data_from_yaml`    | Exists, has rows, key unique        |
-| Relation  | `get_entity` + cross-entity perspective query | Exists, joins work, no fan-out      |
+| Relation  | `get_entity` + cross-entity perspective query | Exists, joins work, no fan-out (validated as part of entity) |
+| Domain    | `search_model` + `preview_data_from_yaml` with domain | Exists, filters apply, fields scoped |

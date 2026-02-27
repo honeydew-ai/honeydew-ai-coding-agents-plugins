@@ -120,7 +120,7 @@ Steps:
 
 **After creating ANY relation, you MUST invoke the `honeydew-validate` skill to test and validate.**
 
-See `honeydew-validate` skill for:
+See the `honeydew-validate` skill (Entities → "Validating Relations") for:
 
 - How to verify relation exists via `get_entity`
 - How to test cross-entity queries work
