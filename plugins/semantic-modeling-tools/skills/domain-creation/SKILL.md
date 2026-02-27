@@ -92,6 +92,20 @@ See [reference.md](reference.md) for: full YAML schema, entity selection syntax,
 
 ---
 
+## Documentation Lookup
+
+Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+
+- You need to understand governance concepts, domain design patterns, or access control strategies
+- The user asks about the difference between semantic filters and source filters, or when to use each
+- You need guidance on advanced modeling configurations like parameter overrides or complex field selectors
+- The user asks about how domains interact with BI tools, queries, or the deep analysis API
+- The user needs advanced modeling patterns for governance or multi-tenant access control
+
+Search for topics like: "domains", "governance", "filters", "field selectors", "access control", "source filters".
+
+---
+
 ## Best Practices
 
 - **Name domains after the business context**, not technical details. `sales_analytics` is better than `filtered_orders_v2`.

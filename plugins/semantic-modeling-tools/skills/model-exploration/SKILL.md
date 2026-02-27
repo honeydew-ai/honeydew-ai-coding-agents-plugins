@@ -143,6 +143,21 @@ Call with:
 - Use `get_field` with entity name and field name to get detailed info about a specific field
 - Use `search_model` with a query string to find any model object by name
 
+## Documentation Lookup
+
+Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+
+- The user asks conceptual questions ("what is an entity?", "how do metrics work?", "what is a semantic layer?")
+- You need to explain Honeydew concepts, architecture, or terminology
+- The user is new to Honeydew and needs orientation on capabilities
+- You need to understand how a feature works beyond what the MCP tool descriptions provide
+- The user asks about advanced modeling concepts or patterns
+- The user asks about integrations, setup, or configuration
+
+Search for topics like: "entities", "metrics", "attributes", "domains", "relations", "semantic layer", "governance", or any Honeydew-specific concept.
+
+---
+
 ## Best Practices
 
 1. Use `get_entity` to explore fields on a specific entity

@@ -330,6 +330,18 @@ User: "Help me understand pricing patterns for Airbnb listings."
 
 ---
 
+## Documentation Lookup
+
+Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+
+- The user asks about query capabilities or features not covered in this skill
+- You need to understand how the query API interacts with domains, parameters, or governance rules
+- The user encounters unexpected query behavior and needs deeper context on how the semantic layer resolves queries
+
+Search for topics like: "queries", "perspectives", "dynamic datasets", "parameters", "query API".
+
+---
+
 ## Best Practices
 
 - **Start with discovery** — always check `list_entities` / `get_entity` before building queries, so you reference real fields
