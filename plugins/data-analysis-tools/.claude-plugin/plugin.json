@@ -1,6 +1,5 @@
 {
   "name": "data-analysis-tools",
-  "displayName": "Data Analysis Tools",
   "description": "Tools for data analysis with Honeydew AI",
   "version": "0.2.0",
   "author": {
@@ -8,6 +7,5 @@
     "email": "support@honeydew.ai"
   },
   "keywords": ["data-analysis", "querying", "honeydew", "analytics"],
-  "license": "Apache-2.0",
-  "logo": "assets/logo.svg"
+  "license": "Apache-2.0"
 }
