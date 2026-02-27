@@ -2,6 +2,13 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [0.2.0] - 2026-02-27
+
+### Added
+
+- **domain-creation** skill — create, update, and delete Honeydew domains with entity selection, field selectors, semantic filters, source filters, and parameter overrides
+- Domain validation section in the **validation** skill
+
 ## [0.1.1] - 2026-02-25
 
 ### Added
