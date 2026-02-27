@@ -151,6 +151,7 @@ Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
 - You need to explain Honeydew concepts, architecture, or terminology
 - The user is new to Honeydew and needs orientation on capabilities
 - You need to understand how a feature works beyond what the MCP tool descriptions provide
+- The user asks about advanced modeling concepts or patterns
 - The user asks about integrations, setup, or configuration
 
 Search for topics like: "entities", "metrics", "attributes", "domains", "relations", "semantic layer", "governance", or any Honeydew-specific concept.

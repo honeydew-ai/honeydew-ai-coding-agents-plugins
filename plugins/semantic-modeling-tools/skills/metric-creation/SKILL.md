@@ -182,8 +182,9 @@ Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
 - You need to understand rollup behavior, metric types, or advanced aggregation patterns beyond what `reference.md` covers
 - The user asks about how metrics behave in BI tools or how context-sensitive aggregation works
 - You need guidance on derived metrics, fixed groupings, or metric composition patterns
+- The user needs **time intelligence** features — period-over-period comparisons, YTD/MTD/QTD calculations, trailing windows, or time-based growth metrics
 
-Search for topics like: "metrics", "rollup", "aggregation", "derived metrics", "fixed grouping".
+Search for topics like: "metrics", "rollup", "aggregation", "derived metrics", "fixed grouping", "time intelligence", "period over period", "YTD", "trailing window".
 
 ---
 

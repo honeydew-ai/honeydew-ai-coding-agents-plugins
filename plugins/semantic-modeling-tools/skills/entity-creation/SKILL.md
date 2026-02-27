@@ -105,8 +105,9 @@ Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
 
 - You need to understand entity source types (physical table, custom SQL, virtual entity) in more depth
 - The user asks about granularity design, entity modeling patterns, or best practices
-- You need guidance on advanced configurations like time spines, composite keys, or multi-dataset entities
+- You need guidance on advanced modeling configurations like time spines, composite keys, or multi-dataset entities
 - The user asks about entity governance, ownership, or lifecycle
+- The user needs advanced modeling patterns (e.g., slowly changing dimensions, snapshot entities, incremental models)
 
 Search for topics like: "entities", "source types", "granularity", "time spine", "virtual entity", "custom SQL source".
 

@@ -110,8 +110,9 @@ Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
 
 - You need to understand join types, cross-filtering behavior, or relationship modeling patterns in more depth
 - The user asks about how relations affect query behavior or metric calculations
-- You need guidance on advanced scenarios like SCD Type 2 joins, self-referencing relations, or multi-path joins
+- You need guidance on advanced modeling scenarios like SCD Type 2 joins, self-referencing relations, or multi-path joins
 - The user asks about relation performance implications or troubleshooting join issues
+- The user needs advanced modeling patterns for complex relationship topologies
 
 Search for topics like: "relations", "joins", "cross-filtering", "many-to-one", "relationship modeling".
 

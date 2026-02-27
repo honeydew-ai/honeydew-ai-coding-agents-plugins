@@ -104,8 +104,9 @@ Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
 - You need warehouse-specific SQL function details not covered in `reference.md` (Snowflake, Databricks, BigQuery differences)
 - The user asks about advanced attribute types (multi-entity, aggregation) or when to use each
 - You need guidance on time grain configuration, format strings, or data type nuances
+- The user needs advanced modeling patterns for calculated attributes (e.g., complex bucketing, conditional logic, semi-structured data extraction)
 
-Search for topics like: "calculated attributes", "attribute types", "multi-entity attribute", "time grain", "format strings".
+Search for topics like: "calculated attributes", "attribute types", "multi-entity attribute", "aggregation attribute", "time grain", "format strings", "advanced modeling".
 
 ---
 
