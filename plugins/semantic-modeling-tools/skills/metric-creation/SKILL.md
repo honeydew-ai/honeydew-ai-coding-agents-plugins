@@ -175,6 +175,18 @@ When the user's request contains phrases suggesting a specific granularity, **as
 
 ---
 
+## Documentation Lookup
+
+Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+
+- You need to understand rollup behavior, metric types, or advanced aggregation patterns beyond what `reference.md` covers
+- The user asks about how metrics behave in BI tools or how context-sensitive aggregation works
+- You need guidance on derived metrics, fixed groupings, or metric composition patterns
+
+Search for topics like: "metrics", "rollup", "aggregation", "derived metrics", "fixed grouping".
+
+---
+
 ## Best Practices
 
 - **Use `FILTER (WHERE ...)` for filtered aggregations** — NOT `CASE WHEN`.
