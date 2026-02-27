@@ -230,10 +230,12 @@ Call with:
 
 - `question` (required): the question in plain English
 - `max_rows` (required): maximum number of rows to return
+- `domain` (required): domain name for query context
 
 ```
 question: "What are the top 10 neighbourhoods by number of listings?"
 max_rows: 10
+domain: "my_domain"
 ```
 
 Returns the query results directly.
@@ -243,9 +245,11 @@ Returns the query results directly.
 Call with:
 
 - `question` (required): the question in plain English
+- `domain` (required): domain name for query context
 
 ```
 question: "What are the top 10 neighbourhoods by number of listings?"
+domain: "my_domain"
 ```
 
 Returns the generated SQL without executing.
@@ -266,10 +270,12 @@ Returns the generated SQL without executing.
 Call with:
 
 - `question` (required): the analysis question
+- `domain` (required): domain name for query context
 - `conversation_id` (optional): ID from a previous deep analysis call, for follow-up questions
 
 ```
 question: "Analyze the relationship between host response time and review scores. Are there significant patterns?"
+domain: "my_domain"
 ```
 
 Returns:
@@ -289,6 +295,7 @@ Use `conversation_id` from the previous response to ask follow-up questions that
 
 ```
 question: "Now break this down by room type — does the pattern hold across all types?"
+domain: "my_domain"
 conversation_id: "<id from previous response>"
 ```
 
