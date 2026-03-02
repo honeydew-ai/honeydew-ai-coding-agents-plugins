@@ -1,5 +1,5 @@
 {
-  "name": "honeydew-ai-claude-plugins",
+  "name": "honeydew-ai-github-copilot-plugins",
   "owner": {
     "name": "Honeydew AI",
     "email": "support@honeydew.ai"
@@ -7,30 +7,20 @@
   "metadata": {
     "description": "Honeydew AI plugins for coding agents - skills and tools powered by the Honeydew AI MCP",
     "version": "0.5.0",
-    "pluginRoot": "plugins"
+    "pluginRoot": "./plugins"
   },
   "plugins": [
     {
       "name": "semantic-modeling-tools",
-      "source": "./plugins/semantic-modeling-tools",
+      "source": "semantic-modeling-tools",
       "description": "Tools for semantic modeling with Honeydew AI",
-      "version": "0.5.0",
-      "author": {
-        "name": "Honeydew AI",
-        "email": "support@honeydew.ai"
-      },
-      "license": "Apache-2.0"
+      "version": "0.5.0"
     },
     {
       "name": "data-analysis-tools",
-      "source": "./plugins/data-analysis-tools",
+      "source": "data-analysis-tools",
       "description": "Tools for data analysis with Honeydew AI",
-      "version": "0.5.0",
-      "author": {
-        "name": "Honeydew AI",
-        "email": "support@honeydew.ai"
-      },
-      "license": "Apache-2.0"
+      "version": "0.5.0"
     }
   ]
 }

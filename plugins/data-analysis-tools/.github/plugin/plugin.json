@@ -1,13 +1,16 @@
 {
   "name": "data-analysis-tools",
-  "displayName": "Data Analysis Tools",
   "description": "Tools for data analysis with Honeydew AI",
   "version": "0.5.0",
   "author": {
     "name": "Honeydew AI",
     "email": "support@honeydew.ai"
   },
-  "keywords": ["data-analysis", "querying", "honeydew", "analytics"],
+  "repository": "https://github.com/honeydew-ai/honeydew-ai-claude-plugins",
   "license": "Apache-2.0",
-  "logo": "assets/logo.svg"
+  "keywords": ["data-analysis", "querying", "honeydew", "analytics"],
+  "skills": [
+    "./skills/filtering",
+    "./skills/query"
+  ]
 }

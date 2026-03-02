@@ -8,7 +8,7 @@ plugins/
   semantic-modeling-tools/     # Entity, attribute, metric, relation, domain, validation, exploration skills
 ```
 
-Each plugin has mirrored `.claude-plugin/` and `.cursor-plugin/` directories containing `plugin.json` and `.mcp.json`. The Cursor variants add `displayName` and `logo` fields.
+Each plugin has mirrored `.claude-plugin/`, `.cursor-plugin/`, and `.github/plugin/` directories containing `plugin.json` and `.mcp.json`. The Cursor variants add `displayName` and `logo` fields. The GitHub Copilot variants add a `skills` array and `repository` field. A root-level GitHub Copilot marketplace is at `.github/plugin/marketplace.json`.
 
 ## Version Bump Checklist
 
@@ -17,10 +17,13 @@ When releasing a new version, update **all** of these files:
 1. `CHANGELOG.md` — add a new entry at the top (format: `## [X.Y.Z] - YYYY-MM-DD`)
 2. `.claude-plugin/marketplace.json` — `metadata.version` + each plugin's `version`
 3. `.cursor-plugin/marketplace.json` — `metadata.version` + each plugin's `version`
-4. `plugins/data-analysis-tools/.claude-plugin/plugin.json`
-5. `plugins/data-analysis-tools/.cursor-plugin/plugin.json`
-6. `plugins/semantic-modeling-tools/.claude-plugin/plugin.json`
-7. `plugins/semantic-modeling-tools/.cursor-plugin/plugin.json`
+4. `.github/plugin/marketplace.json` — `metadata.version` + each plugin's `version`
+5. `plugins/data-analysis-tools/.claude-plugin/plugin.json`
+6. `plugins/data-analysis-tools/.cursor-plugin/plugin.json`
+7. `plugins/data-analysis-tools/.github/plugin/plugin.json`
+8. `plugins/semantic-modeling-tools/.claude-plugin/plugin.json`
+9. `plugins/semantic-modeling-tools/.cursor-plugin/plugin.json`
+10. `plugins/semantic-modeling-tools/.github/plugin/plugin.json`
 
 ## Skill Conventions
 
@@ -33,11 +36,11 @@ When releasing a new version, update **all** of these files:
 - Creation skills must end with a "MANDATORY: Validate After Creating" section pointing to the `validation` skill
 - After `create_object`/`update_object`, always display the `ui_url` from the response
 
-## .claude-plugin vs .cursor-plugin
+## .claude-plugin vs .cursor-plugin vs .github/plugin
 
-- `plugin.json`: Cursor adds `displayName` and `logo`; Claude does not
-- `.mcp.json`: identical across both platforms
-- `marketplace.json`: both must be kept in sync
+- `plugin.json`: Cursor adds `displayName` and `logo`; GitHub adds `skills` array and `repository`; Claude has neither
+- `.mcp.json`: identical across Claude and Cursor (GitHub does not use `.mcp.json`)
+- `marketplace.json`: all three (`.claude-plugin/`, `.cursor-plugin/`, `.github/plugin/`) must be kept in sync
 
 ## CI
 
