@@ -6,10 +6,7 @@ All notable changes to the Honeydew AI Plugins for Coding Agents are documented 
 
 ### Added
 
-- **PreToolUse hooks** for both plugins — automatically inject skill-loading guidance when Honeydew MCP tools are called, ensuring correct tool usage even when skills aren't explicitly loaded
-  - **semantic-modeling-tools**: hooks for creation tools (`create_object`, `update_object`, `create_entity`, `import_tables`) with smart object-type detection, and exploration tools (`list_entities`, `get_entity`, etc.)
-  - **data-analysis-tools**: hooks for query tools (`get_data_from_fields`, `ask_question_*`, `ask_deep_analysis_question`)
-- Matchers use `mcp__.*__<tool_name>` regex to work with any MCP server name
+- **PreToolUse hooks** for both plugins — automatically prompt skill loading when Honeydew MCP tools are called
 
 ## [0.4.1] - 2026-03-02
 
