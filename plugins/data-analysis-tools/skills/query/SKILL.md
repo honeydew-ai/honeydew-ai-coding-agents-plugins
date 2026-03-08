@@ -161,6 +161,18 @@ Call `get_data_from_fields` with:
 - `metrics`: `["detailed_listings.count"]`
 - `order_by`: `["\"detailed_listings.count\" DESC"]`
 
+**Using aliases — rename fields or ad-hoc expressions:**
+
+You can alias any field or ad-hoc expression using `AS "alias_name"`. This controls the column name in the output.
+
+Call `get_data_from_fields` with:
+
+- `attributes`: `["detailed_listings.room_type"]`
+- `metrics`: `["detailed_listings.count AS \"total_listings\"", "AVG(detailed_listings.price) AS \"avg_price\""]`
+- `order_by`: `["\"total_listings\" DESC"]`
+
+Once aliased, use the alias (not the original expression) in `order_by` and `filters`.
+
 **Pagination — large result sets:**
 
 Call `get_data_from_fields` with:
