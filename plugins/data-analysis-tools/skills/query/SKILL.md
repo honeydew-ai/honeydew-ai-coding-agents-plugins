@@ -171,7 +171,7 @@ Call `get_data_from_fields` with:
 - `metrics`: `["detailed_listings.count AS \"total_listings\"", "AVG(detailed_listings.price) AS \"avg_price\""]`
 - `order_by`: `["\"total_listings\" DESC"]`
 
-Once aliased, use the alias (not the original expression) in `order_by` and `filters`.
+Once aliased, use the alias (not the original expression) in `order_by`.
 
 **Pagination — large result sets:**
 
