@@ -12,6 +12,7 @@ Filtering restricts which rows contribute to a result. The same expression langu
 | **Perspective query**    | `filters:` block in YAML perspective   | Pre-aggregation    |
 | **Metric aggregation**   | `FILTER (WHERE ...)` on an aggregation | During aggregation |
 | **Attribute expression** | `CASE WHEN ... END` in attribute SQL   | Per-row evaluation |
+| **Metric value filter**  | Metric expression in `filters:` param  | Post-aggregation   |
 
 ---
 
@@ -139,6 +140,14 @@ CASE
   ELSE 'low'
 END
 ```
+
+### 4. Filtering by Metric Values
+
+You can filter on aggregated metric values — the equivalent of SQL's `HAVING` clause. Use the metric expression (named or ad-hoc) in the `filters` parameter of a structured query. These filters are applied **after** aggregation.
+
+This works with both named metrics (e.g., `entity.metric_name > 10`) and ad-hoc aggregations (e.g., `COUNT(entity.field) > 1`).
+
+> For examples — including duplicate detection, minimum group size, and revenue thresholds — see `examples.md`.
 
 ---
 
