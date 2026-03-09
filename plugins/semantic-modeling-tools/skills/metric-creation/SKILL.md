@@ -3,6 +3,12 @@ name: metric-creation
 description: Guides you step-by-step through defining a business metric (aggregation) on a Honeydew entity. Covers SQL expression building and pushes to Honeydew via the MCP tools.
 ---
 
+## Prerequisites
+
+Before creating metrics, ensure you are on the correct workspace and branch. Use `get_session_workspace_and_branch` to check the current session context. For development work, create a branch with `create_workspace_branch` (the session switches automatically). See the `model-exploration` skill for the full workspace/branch tool reference.
+
+---
+
 ## Overview
 
 A Honeydew **metric** is a named, reusable aggregation anchored to an entity.
