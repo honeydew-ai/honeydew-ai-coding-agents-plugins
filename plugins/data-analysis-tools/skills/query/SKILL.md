@@ -3,6 +3,12 @@ name: query
 description: Use when the user wants to query, analyze, or explore data through the Honeydew semantic layer. Covers structured queries, natural-language questions, and multi-step deep analysis.
 ---
 
+## Prerequisites
+
+Queries run against the workspace and branch set for the current session. Use `get_session_workspace_and_branch` to check the current context. If no workspace/branch is set, use `list_workspaces` and `set_session_workspace_and_branch` to select one. See the `model-exploration` skill for the full workspace/branch tool reference.
+
+---
+
 ## Overview
 
 Honeydew provides three ways to query data through the semantic layer. Each method suits a different situation — pick the right one based on how well you understand the model and how complex the question is.

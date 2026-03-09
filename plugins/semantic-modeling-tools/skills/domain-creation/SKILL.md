@@ -3,6 +3,12 @@ name: domain-creation
 description: Guides you through creating a Honeydew domain — a governance object that scopes entity/field visibility and applies mandatory filters — ideal for setting up contexts for deep analysis.
 ---
 
+## Prerequisites
+
+Before creating domains, ensure you are on the correct workspace and branch. Use `get_session_workspace_and_branch` to check the current session context. For development work, create a branch with `create_workspace_branch` and switch to it with `set_session_workspace_and_branch`. See the `model-exploration` skill for the full workspace/branch tool reference.
+
+---
+
 ## Overview
 
 A Honeydew **domain** is a lightweight governance object that defines a scoped business context over the semantic model.

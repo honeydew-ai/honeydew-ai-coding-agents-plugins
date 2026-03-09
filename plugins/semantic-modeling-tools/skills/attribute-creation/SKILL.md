@@ -3,6 +3,12 @@ name: attribute-creation
 description: Guides you step-by-step through defining a calculated attribute (dimension) on a Honeydew entity. Covers SQL expression building and pushes to Honeydew via the MCP tools.
 ---
 
+## Prerequisites
+
+Before creating attributes, ensure you are on the correct workspace and branch. Use `get_session_workspace_and_branch` to check the current session context. For development work, create a branch with `create_workspace_branch` and switch to it with `set_session_workspace_and_branch`. See the `model-exploration` skill for the full workspace/branch tool reference.
+
+---
+
 ## Overview
 
 A Honeydew **calculated attribute** is a virtual, per-row column defined on an entity — analogous to an expression in a SQL `SELECT` clause.
