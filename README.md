@@ -14,7 +14,7 @@ Skills and tools powered by the [Honeydew MCP](https://honeydew.ai/docs/integrat
 Add this marketplace to Claude Code:
 
 ```
-/plugin marketplace add honeydew-ai/honeydew-ai-claude-plugins
+/plugin marketplace add honeydew-ai/honeydew-ai-coding-agents-plugins
 ```
 
 Then install the plugins you need:
