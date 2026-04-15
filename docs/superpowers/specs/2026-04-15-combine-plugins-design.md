@@ -14,15 +14,15 @@ Merge `data-analysis-tools` and `semantic-modeling-tools` into a single `honeyde
   .claude-plugin/
     plugin.json         # honeydew-ai v0.7.0 — already done
     marketplace.json    # updated: single plugin, source "."
-    .mcp.json           # already done
+    .mcp.json           # updated: add honeydew MCP server
   .cursor-plugin/
     plugin.json         # honeydew-ai v0.7.0 — already done
     marketplace.json    # updated: single plugin, source "."
-    .mcp.json           # already done
+    .mcp.json           # updated: add honeydew MCP server
   .github/plugin/
     plugin.json         # honeydew-ai v0.7.0 with skills list — already done
     marketplace.json    # updated: single plugin, source "."
-  .mcp.json             # already done
+  .mcp.json             # updated: add honeydew MCP server
   assets/
     logo.svg            # already done
   hooks/
@@ -55,15 +55,22 @@ Merge `data-analysis-tools` and `semantic-modeling-tools` into a single `honeyde
 3. **Update `.cursor/skills/` symlinks** — repoint each symlink from `../../plugins/.../skills/X` to `../../skills/X`.
 4. **Update `.gemini/skills/` symlinks** — same as above.
 5. **Update marketplace files** — all three marketplace files: set `pluginRoot` to `"."`, replace two-plugin list with a single `honeydew-ai` entry with `source: "."`.
-6. **Bump version** — `gemini-extension.json` to `0.7.0`; all marketplace `metadata.version` fields (already 0.7.0 in root plugin.json files).
-7. **Add CHANGELOG entry** — document v0.7.0 consolidation.
-8. **Delete old plugins** — remove `plugins/data-analysis-tools/` and `plugins/semantic-modeling-tools/`.
-9. **Update CLAUDE.md** — reflect new single-plugin structure, updated skill conventions, updated version bump checklist.
+6. **Update `.mcp.json` files** — add the `honeydew` MCP server to the three `.mcp.json` files (root, `.claude-plugin/`, `.cursor-plugin/`):
+   ```json
+   "honeydew": {
+     "type": "http",
+     "url": "https://api.honeydew.cloud/mcp/"
+   }
+   ```
+7. **Bump version** — `gemini-extension.json` to `0.7.0`; all marketplace `metadata.version` fields (already 0.7.0 in root plugin.json files).
+8. **Add CHANGELOG entry** — document v0.7.0 consolidation.
+9. **Delete old plugins** — remove `plugins/data-analysis-tools/` and `plugins/semantic-modeling-tools/`.
+10. **Update CLAUDE.md** — reflect new single-plugin structure, updated skill conventions, updated version bump checklist, add `.mcp.json` files to checklist.
 
 ## What Does Not Change
 
 - All `plugin.json` content (name, description, version, keywords, license, author)
-- All `.mcp.json` content
+- All `.mcp.json` structure (the `honeydew` server is added, existing `honeydew-docs` entry unchanged)
 - All `hooks/` scripts and `hooks.json`
 - All `assets/`
 - All skill content (SKILL.md, examples.md, reference.md files)
