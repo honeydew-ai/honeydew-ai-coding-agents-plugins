@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.0] - 2026-04-22
+
+### Changed
+
+- **First stable release** — bumped to 1.0.0
+
 ## [0.7.1] - 2026-04-20
 
 ### Changed
