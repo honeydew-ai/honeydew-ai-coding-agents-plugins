@@ -52,7 +52,11 @@ Use the Honeydew MCP tools to interact with the model.
 - `get_field` - Get detailed info for a specific field (attribute or metric) within an entity
 - `list_domains` - List all domains with their names, descriptions, and entities
 - `get_domain` - Get detailed info for a specific domain (entities, filters, parameters, YAML)
-- `search_model` - Search across all model objects (entities, attributes, metrics, datasets, perspectives, domains, parameters)
+- `search_model` - Search across all model objects (entities, attributes, metrics, datasets, dynamic datasets, domains, parameters). Requires `query` and `search_mode`:
+  - `OR` — splits by whitespace, returns objects matching any word
+  - `AND` — splits by whitespace, returns only objects matching all words
+  - `EXACT` — uses the full string as-is, matches name or display name exactly
+  - Use `entity.field` syntax to scope to fields within an entity (e.g. `customers.balance` finds `balance` on entities matching `customers`; `customers.` returns all fields of matching entities)
 
 ### Agents & Context
 
@@ -137,7 +141,7 @@ Call with:
 - Use `get_field` with entity name and field name to get detailed info about a specific field
 - Use `list_domains` to list all domains
 - Use `get_domain` with a domain name to see its entities, filters, parameters, and YAML definition
-- Use `search_model` with a query string to find any model object by name
+- Use `search_model` with a query string and `search_mode` (`OR`, `AND`, or `EXACT`) to find any model object by name. Use `EXACT` when you know the precise name; use `OR` or `AND` for broad discovery
 
 ## Documentation Lookup
 

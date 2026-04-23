@@ -92,7 +92,7 @@ sql: |-
 To modify an existing metric:
 
 1. Use `get_entity` with the entity name to find the metric and its details.
-2. Use `search_model` to find the metric's `object_key`.
+2. Use `search_model` (with `search_mode: EXACT`) to find the metric's `object_key`.
 3. Call `update_object` with the full updated YAML (`yaml_text`) and the `object_key`.
 
 > **Minimal diff rule:** When updating, preserve the existing field order and formatting from the current YAML. Only change the fields you need to modify. Objects are versioned in git, so unnecessary reordering or reformatting creates noisy diffs.
@@ -103,7 +103,7 @@ After a successful `create_object` or `update_object` call, the response include
 
 ### delete_object (for deletion)
 
-1. Use `search_model` to find the metric's `object_key`.
+1. Use `search_model` (with `search_mode: EXACT`) to find the metric's `object_key`.
 2. Call `delete_object` with the `object_key`.
 
 ---
@@ -120,7 +120,7 @@ Use these MCP tools to explore existing metrics:
 
 - `get_entity` — Get entity details including all its metrics, attributes, datasets, and relations
 - `get_field` — Get detailed info about a specific metric by entity and field name
-- `search_model` — Search for metrics across the model by name
+- `search_model` — Search for metrics across the model by name (use `search_mode: EXACT` for known names, `OR` for broad discovery)
 - `list_entities` — List entities to identify where to anchor new metrics
 
 ---

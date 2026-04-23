@@ -41,14 +41,14 @@ Required permission: Editor or higher.
 
 ### Update: update_object
 
-1. Use `search_model` to find the domain's `object_key`.
+1. Use `search_model` (with `search_mode: EXACT`) to find the domain's `object_key`.
 2. Call `update_object` with the full updated YAML (`yaml_text`) and the `object_key`.
 
 > **Minimal diff rule:** When updating, preserve the existing field order and formatting from the current YAML. Only change the fields you need to modify.
 
 ### Delete: delete_object
 
-1. Use `search_model` to find the domain's `object_key`.
+1. Use `search_model` (with `search_mode: EXACT`) to find the domain's `object_key`.
 2. Call `delete_object` with that `object_key`.
 
 ### After Creation/Update: Display the UI Link
@@ -63,7 +63,7 @@ After a successful `create_object` or `update_object` call, the response include
 Need to create a domain?
     │
     ├─► Which entities should be included?
-    │       └─► Use list_entities / search_model to discover available entities
+    │       └─► Use list_entities / search_model (OR mode) to discover available entities
     │
     ├─► Should all fields be visible, or only a subset?
     │       ├─► All fields → omit fields for that entity
@@ -92,7 +92,7 @@ Use these MCP tools before creating domains:
 - `get_entity` — Get detailed info for a specific entity (attributes, metrics, relations)
 - `list_domains` — List all existing domains in the model
 - `get_domain` — Get detailed info for a specific domain (entities, filters, parameters)
-- `search_model` — Search for entities, fields, domains, or other objects by name
+- `search_model` — Search for entities, fields, domains, or other objects by name (use `search_mode: EXACT` for known names, `OR` for broad discovery)
 - `get_field` — Get detailed info about a specific field (attribute or metric)
 
 ---
@@ -135,7 +135,7 @@ Search for topics like: "domains", "governance", "filters", "field selectors", "
 
 ### Validation steps:
 
-1. **Verify domain exists** using `search_model` to find the new domain by name.
+1. **Verify domain exists** using `search_model` (with `search_mode: EXACT`) to find the new domain by name.
 
 2. **Test with a query** — use `get_data_from_fields` with the `domain` parameter:
 

@@ -87,7 +87,7 @@ Use these MCP tools before defining relations:
 
 - `get_entity` — Get entity details including existing relations, attributes, and YAML definition
 - `list_entities` — List all entities (to identify source and target)
-- `search_model` — Search for entities or fields by name
+- `search_model` — Search for entities or fields by name (use `search_mode: EXACT` for known names, `OR` for broad discovery)
 
 ---
 

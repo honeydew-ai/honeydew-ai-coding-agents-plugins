@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.1] - 2026-04-23
+
+### Changed
+
+- **Update search_model documentation across all skills** — document required `search_mode` parameter (`OR`/`AND`/`EXACT`), `entity.field` scoping syntax, and guidance on which mode to use for lookups vs. broad discovery
+
 ## [1.0.0] - 2026-04-22
 
 ### Changed

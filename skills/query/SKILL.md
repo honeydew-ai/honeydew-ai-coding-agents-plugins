@@ -99,7 +99,7 @@ Before building a query, discover the available fields:
 2. `get_entity` with entity name — see its attributes, metrics, and relations
 3. `get_field` with entity and field name — get detailed info about a specific field
 4. `list_domains` — see all available domains (useful before passing `domain` parameter)
-5. `search_model` with a keyword — find fields across the model
+5. `search_model` with a keyword and `search_mode` (`OR` for broad discovery, `EXACT` for known names) — find fields across the model
 
 ### Examples
 
