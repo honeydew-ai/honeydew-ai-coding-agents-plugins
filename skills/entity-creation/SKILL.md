@@ -95,7 +95,7 @@ Use these MCP tools before creating entities:
 
 - `list_entities` — List all entities in the model
 - `get_entity` — Get detailed info for a specific entity (attributes, metrics, datasets, relations)
-- `search_model` — Search for entities, fields, or other objects by name
+- `search_model` — Search for entities, fields, or other objects by name (use `search_mode: EXACT` for known names, `OR` for broad discovery)
 - `list_databases` — List all databases in the connected data warehouse
 - `list_schemas` — List schemas in a specific database
 - `list_tables` — List warehouse tables (requires `database` and `schema` parameters)

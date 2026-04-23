@@ -164,7 +164,7 @@ Call `get_data_from_fields` with a cross-entity query:
 
 **Step 1: Verify domain exists**
 
-Use `search_model` to find the new domain by name.
+Use `search_model` (with `search_mode: EXACT`) to find the new domain by name.
 
 **Step 2: Test with a scoped query**
 

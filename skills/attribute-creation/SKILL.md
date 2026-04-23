@@ -70,7 +70,7 @@ folder: <optional folder path>
 
 ### Update: update_object
 
-1. Use `get_entity` or `search_model` to find the attribute's `object_key`.
+1. Use `get_entity` or `search_model` (with `search_mode: EXACT`) to find the attribute's `object_key`.
 2. Call `update_object` with the full updated YAML (`yaml_text`) and the `object_key`.
 
 > **Minimal diff rule:** When updating, preserve the existing field order and formatting from the current YAML. Only change the fields you need to modify. Objects are versioned in git, so unnecessary reordering or reformatting creates noisy diffs.
@@ -81,7 +81,7 @@ After a successful `create_object` or `update_object` call, the response include
 
 ### Delete: delete_object
 
-1. Use `search_model` to find the attribute's `object_key`.
+1. Use `search_model` (with `search_mode: EXACT`) to find the attribute's `object_key`.
 2. Call `delete_object` with that `object_key`.
 
 ---
@@ -98,7 +98,7 @@ Use these MCP tools to explore existing attributes:
 
 - `get_entity` — Get entity details including all attributes (filter by `__typename` for `CalcAttribute` or `DataSetAttribute`)
 - `get_field` — Get detailed info about a specific attribute by entity and field name
-- `search_model` — Search for attributes across the model by name
+- `search_model` — Search for attributes across the model by name (use `search_mode: EXACT` for known names, `OR` for broad discovery)
 - `list_entities` — List entities to identify where to anchor new attributes
 
 ---
