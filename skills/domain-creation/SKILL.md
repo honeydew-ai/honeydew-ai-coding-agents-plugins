@@ -131,7 +131,9 @@ Search for topics like: "domains", "governance", "filters", "field selectors", "
 
 ## MANDATORY: Validate After Creating
 
-**After creating ANY domain, you MUST validate that it works correctly.**
+**After creating ANY domain, you MUST invoke the `validation` skill to test and validate that it works correctly.**
+
+See `validation` skill for the full domain validation workflow.
 
 ### Validation steps:
 

@@ -2,13 +2,13 @@
   "name": "honeydew-ai",
   "displayName": "Honeydew AI",
   "description": "Skills and tools powered by the Honeydew MCP that help coding agents query data and build semantic models",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Honeydew AI",
     "email": "support@honeydew.ai"
   },
   "homepage": "https://honeydew.ai/docs/integration/mcp",
-  "repository": "https://github.com/honeydew-ai/honeydew-ai-claude-plugins",
+  "repository": "https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins",
   "license": "Apache-2.0",
   "keywords": ["semantic-layer", "data-modeling", "honeydew", "analytics", "data-analysis", "querying"],
   "logo": "assets/logo.svg"

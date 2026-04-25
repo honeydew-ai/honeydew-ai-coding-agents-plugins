@@ -2,6 +2,16 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.2] - 2026-04-25
+
+### Added
+
+- **Codex plugin support** — add `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, and Codex installation documentation
+
+### Changed
+
+- **Agent-neutral documentation** — update README examples and stale skill cross-references to use current skill names
+
 ## [1.0.1] - 2026-04-23
 
 ### Changed

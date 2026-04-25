@@ -138,9 +138,9 @@ Search for topics like: "relations", "joins", "cross-filtering", "many-to-one", 
 
 ## MANDATORY: Validate After Creating
 
-**After creating ANY relation, you MUST invoke the `honeydew-validate` skill to test and validate.**
+**After creating ANY relation, you MUST invoke the `validation` skill to test and validate.**
 
-See the `honeydew-validate` skill (Entities → "Validating Relations") for:
+See the `validation` skill (Entities → "Validating Relations") for:
 
 - How to verify relation exists via `get_entity`
 - How to test cross-entity queries work

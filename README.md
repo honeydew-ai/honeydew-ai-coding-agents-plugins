@@ -4,15 +4,15 @@ Skills and tools powered by the [Honeydew MCP](https://honeydew.ai/docs/integrat
 
 ## Example Use Cases
 
-**Query your data** — Ask "Show me revenue by region for last quarter." Claude discovers the right entities and metrics, runs the query through the semantic layer, and returns the results.
+**Query your data** — Ask "Show me revenue by region for last quarter." Your coding agent discovers the right entities and metrics, runs the query through the semantic layer, and returns the results.
 
-**Build a semantic model** — Ask "I added a new orders table — create an entity with revenue and order count metrics." Claude imports the table, defines attributes and metrics following your naming conventions, and validates the result.
+**Build a semantic model** — Ask "I added a new orders table — create an entity with revenue and order count metrics." Your coding agent imports the table, defines attributes and metrics following your naming conventions, and validates the result.
 
-**Investigate anomalies** — Ask "Why did churn spike last month?" Claude runs a multi-step deep analysis, explores correlations across your model, and surfaces the key drivers with supporting data.
+**Investigate anomalies** — Ask "Why did churn spike last month?" Your coding agent runs a multi-step deep analysis, explores correlations across your model, and surfaces the key drivers with supporting data.
 
 ## Prerequisites
 
-- A coding agent that supports plugins/skills (e.g., [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.com), or any agent with MCP support)
+- A coding agent that supports plugins/skills (e.g., [Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Codex](https://developers.openai.com/codex/cli), [Cursor](https://cursor.com), or any agent with MCP support)
 - A Honeydew AI workspace with the [Honeydew MCP server](https://honeydew.ai/docs/integration/mcp) configured
 
 ## Installation
@@ -31,10 +31,25 @@ Then install the plugin:
 /plugin install honeydew-ai@honeydew-ai-coding-agents-plugins
 ```
 
+### Codex
+
+Add this marketplace to Codex:
+
+```
+codex plugin marketplace add honeydew-ai/honeydew-ai-coding-agents-plugins
+```
+
+Then open the plugin directory and install the plugin:
+
+```
+codex
+/plugins
+```
+
 ### Cursor
 
 1. Go to Cursor Settings -> Rules, Skills, Subagents and click on **+New** next to Rules.
-2. Select **Add from GitHub** and enter provide the url of this repository.
+2. Select **Add from GitHub** and enter the URL of this repository.
 
 ### Other Coding Agents
 
