@@ -3,10 +3,15 @@ name: Validate Plugin
 on:
     pull_request:
         paths:
+            - ".agents/plugins/**"
             - ".claude-plugin/**"
+            - ".codex-plugin/**"
             - "skills/**"
             - "hooks/**"
-            - "Agents.md"
+            - "AGENTS.md"
+            - "CLAUDE.md"
+            - "GEMINI.md"
+            - ".github/copilot-instructions.md"
 
 jobs:
     validate:

@@ -20,7 +20,7 @@ When creating an entity you are answering three questions:
 3. **What columns should be exposed?** — the initial attribute mapping from source columns
 
 > This skill focuses on the entity shell: source, key, and attribute mapping.
-> Use `honeydew-attribute` to add calculated attributes and `honeydew-relation` to wire up joins afterwards.
+> Use `attribute-creation` to add calculated attributes and `relation-creation` to wire up joins afterwards.
 
 ---
 
@@ -135,9 +135,9 @@ Search for topics like: "entities", "source types", "granularity", "time spine",
 
 ## MANDATORY: Validate After Creating
 
-**After creating ANY entity, you MUST invoke the `honeydew-validate` skill to test and validate.**
+**After creating ANY entity, you MUST invoke the `validation` skill to test and validate.**
 
-See `honeydew-validate` skill for:
+See `validation` skill for:
 
 - How to verify entity exists via `list_entities`
 - How to verify data flows via `get_data_from_fields`
