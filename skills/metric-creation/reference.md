@@ -73,7 +73,6 @@ average-daily-revenue, peak-daily-revenue, and similar metrics).
 -- Preferred: named-metric form
 orders.revenue GROUP BY (orders.customer_id)
 orders.revenue GROUP BY (*, orders.order_date)
-orders.count GROUP BY (*, orders.order_date)
 
 -- Raw aggregation fallback
 SUM(orders.amount) GROUP BY (orders.customer_id)
