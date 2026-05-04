@@ -36,12 +36,12 @@ If the information describes *how to compute something*, *what a value means mat
 
 ### When to use the Semantic Layer instead
 
-| Request | Wrong approach | Correct approach |
+| Request | ❌ Wrong approach | ✅ Correct approach |
 |---|---|---|
 | "Add a rule that revenue = price × quantity" | Instruction: "revenue is price × quantity" | Calculated attribute or metric with `sql: orders.price * orders.quantity` |
 | "Explain how to calculate LTV" | Instruction with formula | Metric with the LTV SQL expression |
 | "Document that active customers are those with an order in 90 days" | Instruction with definition | Calculated attribute `is_active` with `sql: orders.last_order_date >= CURRENT_DATE - 90` |
-| "Add a rule that we always filter to the current fiscal year" | Instruction with filter logic | Domain filter or global parameter |
+| "Add a rule that we always filter to the current fiscal year" | Instruction with filter logic | Domain filter or global parameter — *unless* the preference is about which existing filter to apply, in which case an instruction referencing the filter by name is fine |
 | "Record that the orders table has columns order_id, customer_id..." | Knowledge item | Entity and dataset definition via `entity-creation` skill |
 | "Add a note that revenue excludes returns" | Instruction | Metric `sql` with `FILTER (WHERE NOT orders.is_return)`, plus a clear `description` on the metric |
 
@@ -116,6 +116,8 @@ When configuring an AI agent, context items are referenced using **glob patterns
 - `finance/*` — all finance-specific rules and skills
 - `customer/*` — all customer analysis guidelines
 - `*/churn-*` — all churn-related items regardless of team folder
+- `menu/**` — all items under `menu/` including subfolders (e.g. `menu/drinks/latte-art`)
+- `**` — all context items across all folders and subfolders (use sparingly; typically for a catch-all agent)
 
 **Organize by the team or domain that owns the context**, not by the item type. Items of different types (instruction + skill + knowledge) for the same domain belong in the same folder:
 
