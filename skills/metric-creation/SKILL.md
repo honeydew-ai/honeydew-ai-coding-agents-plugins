@@ -39,7 +39,8 @@ Use a metric when:
 - **DO NOT use window functions** — only aggregations allowed
 - **DO NOT use joins or subqueries** — simple expressions only
 - **NEVER use COUNT(\*)** — use the entity's built-in count metric (e.g., `entity.count`) if available,
-  or `COUNT(entity.key_field)` on a specific key column.
+  or `COUNT(entity.key_field)` on the primary key. No `DISTINCT` needed — primary keys are
+  unique by definition.
 - **Compose from existing metrics whenever possible.** Honeydew accepts named metric references
   (`entity.metric_name`) anywhere you'd write a raw aggregation — inside `FILTER (WHERE ...)`, inside
   `GROUP BY (...)` (both fixed `GROUP BY (dim)` and nested `GROUP BY (*, dim)`), and as operands
@@ -250,7 +251,8 @@ Search for topics like: "metrics", "aggregation", "derived metrics", "fixed grou
   Referenced objects propagate definition changes automatically and express business concepts
   rather than SQL implementation details.
 - **Never use COUNT(\*).** Use the entity's built-in count metric (e.g., `entity.count`) when available.
-  Otherwise, use `COUNT(entity.key_field)` on the entity's key column.
+  Otherwise, use `COUNT(entity.key_field)` on the primary key. No `DISTINCT` needed — primary
+  keys are unique by definition.
 - **Name metrics after the business concept**, not the SQL. `gross_margin` is better than `revenue_minus_cogs_divided_by_revenue`.
 - **Use Derived metrics for ratios.** Build numerator and denominator as separate metrics first.
 - **Use fully qualified column names.** `orders.amount`, not just `amount`.
@@ -285,7 +287,8 @@ intended — revisit the filter expression.
 
 ## Common Pitfalls to Avoid
 
-- **Using `COUNT(*)`** — use the entity's built-in count metric if available, or `COUNT(entity.key_field)` on a specific key.
+- **Using `COUNT(*)`** — use the entity's built-in count metric if available, or
+  `COUNT(entity.key_field)` on the primary key. No `DISTINCT` needed — primary keys are unique.
 - **Re-deriving from raw aggregations when a named metric exists.** Whether the new metric wraps a
   FILTER, a fixed `GROUP BY (dim)`, a nested `GROUP BY (*, dim)`, or arithmetic, the named-metric
   form is preferred over the raw aggregation. The raw form is only correct when no suitable named
