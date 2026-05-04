@@ -13,6 +13,8 @@ Before creating context items, ensure you are on the correct workspace and branc
 
 **Context items** are the mechanism for giving the AI analyst persistent, organizational knowledge: standing rules it must always follow, on-demand procedures it can retrieve, external references it can look up, and a historical record of notable events.
 
+Context items belong to the **context layer** — they are consumed by the Honeydew AI analyst at query time to shape its behavior. They are separate from the **semantic layer** (entities, metrics, attributes, relations, domains), which defines your data model and business logic such as metric calculations.
+
 There are four types:
 
 | Type | Subtype | When retrieved | Use for |
