@@ -47,14 +47,9 @@ Use a metric when:
   in derived arithmetic. Always check whether an existing metric can be the building block before
   reaching for `SUM(...)`, `COUNT(...)`, etc. The named-metric form expresses business intent,
   inherits future changes to the base metric, and keeps the model DRY.
-- **For cross-entity distinct counts, use the related entity's `count` metric WITH a join-forcing
-  filter.** When you'd reach for `COUNT(DISTINCT entity.fk_column)`, the right pattern is
-  `related_entity.count FILTER (WHERE entity.entity_key IS NOT NULL)` — for example,
-  `users.count FILTER (WHERE bookings.booking_id IS NOT NULL)`. The filter referencing a
-  non-null column on the source entity forces Honeydew to actually join the entities; without
-  it, the optimizer prunes the join in standalone queries and the metric returns the related
-  entity's full total instead of the bookings-filtered subset. See reference.md "Cross-Entity
-  Distinct Counts" for full mechanics.
+- **For cross-entity counts, clarify intent first** — filtered count or simple count. Use
+  `related_entity.count FILTER (WHERE source_entity.key IS NOT NULL)` for a filtered count.
+  See reference.md "Cross-entity counts" for mechanics.
 - **Reuse existing attributes** — if a calculated attribute already exists (or you just created
   one), reference it by name (e.g., `entity.attribute_name`) rather than repeating its SQL logic.
 - **Use fully qualified column names** — `entity.attribute`, not just `attribute`
@@ -230,12 +225,10 @@ Search for topics like: "metrics", "aggregation", "derived metrics", "fixed grou
   When a user asks for "number of users who made a booking" or similar, confirm whether they want:
   1. **Filtered count** — count of related-entity members that appear in the source (e.g. users who
      have at least one booking). Use `related_entity.count FILTER (WHERE source_entity.entity_key
-     IS NOT NULL)`. The filter referencing a per-row column on the source entity forces Honeydew to
-     join the entities. Without it, the optimizer may prune the join and return the related entity's
-     full total instead of the filtered subset.
-     Example: `users.count FILTER (WHERE bookings.booking_id IS NOT NULL)`
+     IS NOT NULL)`. Example: `users.count FILTER (WHERE bookings.booking_id IS NOT NULL)`
   2. **Simple count** — just the total count of the related entity with no filtering. Use
      `related_entity.count` directly, or `COUNT(DISTINCT source_entity.fk_column)` as a raw fallback.
+  See reference.md "Cross-entity counts" for why the filter matters.
 - **Compose from existing model objects — attributes and metrics alike.** Honeydew's semantic
   layer is object-oriented: attributes and metrics are named, reusable building blocks. When
   building a new metric, prefer referencing existing objects over inlining raw SQL. This applies
@@ -293,15 +286,12 @@ intended — revisit the filter expression.
   FILTER, a fixed `GROUP BY (dim)`, a nested `GROUP BY (*, dim)`, or arithmetic, the named-metric
   form is preferred over the raw aggregation. The raw form is only correct when no suitable named
   metric exists.
-- **Cross-entity count without a join-forcing filter.** `related_entity.count` alone gets pruned
-  in standalone queries — the optimizer drops the join because nothing in the SQL forces it. Result
-  is the related entity's full total, not the filtered count the description promises. Always pair
-  with `FILTER (WHERE source_entity.entity_key IS NOT NULL)` to force the join. And don't use
-  `FILTER (WHERE source_entity.count > 0)` — that's a global scalar predicate, not a per-row one.
+- **Cross-entity filtered count missing the filter.** Always pair with
+  `FILTER (WHERE source_entity.entity_key IS NOT NULL)`. See reference.md for mechanics.
 - **Using `COUNT(DISTINCT entity.fk_column)` without checking if a related entity has a `count`
-  metric first.** Most imported entities auto-generate a `count` metric. If a relation exists,
-  prefer the `related_entity.count FILTER (...)` form for the readability and DRY benefits.
-  `COUNT(DISTINCT)` is the fallback when there's no relation or no count metric.
+  metric first.** Entities auto-generate a `count` metric. If a relation exists,
+  prefer the `related_entity.count FILTER (...)` form. `COUNT(DISTINCT)` is the fallback
+  when there's no relation or no count metric.
 - **Repeating attribute logic that already exists** — if a calculated attribute already exists,
   reference it by name instead of duplicating its SQL.
 - **Using window functions** — only aggregations allowed in metrics.
