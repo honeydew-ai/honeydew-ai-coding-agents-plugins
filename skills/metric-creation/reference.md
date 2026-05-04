@@ -33,7 +33,7 @@ The raw fallback is the right choice **only** when no named metric for the base
 aggregation exists, or — for cross-entity counts — when there's no relation between the
 two entities. Otherwise, prefer the named-metric form.
 
-> Most imported entities auto-generate a `count` metric. Check before reaching for
+> Entities auto-generate a `count` metric. Check before reaching for
 > `COUNT(*)` or `COUNT(entity.key_field)` — `entity.count` is almost always already there.
 
 ### Filtered aggregations
@@ -89,10 +89,11 @@ entities. Without it, the optimizer may prune the join and return the related en
 full total.
 
 ```sql
--- Filtered count: users who have at least one booking
+-- Filtered count: forces the join, counts only matching members
 users.count FILTER (WHERE bookings.booking_id IS NOT NULL)
+properties.count FILTER (WHERE bookings.booking_id IS NOT NULL)
 
--- Simple count: total users (also valid — use when no filtering is intended)
+-- Simple count: total members with no filtering (also valid)
 users.count
 
 -- Raw fallback when no relation exists between the entities
