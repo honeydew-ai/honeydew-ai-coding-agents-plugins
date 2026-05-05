@@ -31,6 +31,12 @@ Then install the plugin:
 /plugin install honeydew-ai@honeydew-ai-claude-plugins
 ```
 
+Then reload plugins to activate:
+
+```
+/reload-plugins
+```
+
 ### Codex
 
 Add this marketplace to Codex:
