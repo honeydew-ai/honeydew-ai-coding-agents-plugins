@@ -77,6 +77,8 @@ sql: COUNT(orders.order_id)
 
 ## Distinct count — distinct customers across orders
 
+Call `create_object` with yaml_text:
+
 **Preferred form** — named-metric with join-forcing filter:
 
 ```yaml
@@ -105,22 +107,6 @@ description: Count of distinct customers with at least one order
 owner: data-team
 datatype: number
 sql: COUNT(DISTINCT orders.customer_id)
-```
-
-**Don't do this** — looks right, breaks under standalone queries because the optimizer
-prunes the orders join entirely:
-
-```yaml
-sql: customers.count   # standalone query returns ALL customers, not just customers-with-orders
-```
-
-**Don't do this either** — `orders.count` inside `FILTER` becomes a HAVING condition
-evaluated at the outer query's grouping level, not per-customer. If the query groups by
-month, it asks "does this month have any orders?" — almost always true. The filter is a
-no-op and all customers are returned, not just those with orders:
-
-```yaml
-sql: customers.count FILTER (WHERE orders.count > 0)
 ```
 
 ## Fixed Grouping — daily revenue share
