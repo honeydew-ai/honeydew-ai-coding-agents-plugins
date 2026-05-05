@@ -13,10 +13,11 @@ Queries run against the workspace and branch set for the current session. Use `g
 
 Honeydew provides three ways to query data through the semantic layer. Each method suits a different situation — pick the right one based on how well you understand the model and how complex the question is.
 
-| Method               | Tool                                           | Best For                                                                         |
-| -------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Structured query** | `get_data_from_fields` / `get_sql_from_fields` | You know the exact fields. Deterministic, full control.                          |
-| **Deep analysis**    | `ask_deep_analysis_question`                   | Any natural language question — simple or complex, "why", multi-step, agentic.  |
+| Method                    | Tool                                              | Best For                                                                         |
+| ------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | You know the exact fields. Deterministic, full control.                          |
+| **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
+| **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 
 ---
 
@@ -43,7 +44,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 
 Both take the same field parameters.
 
-### 2. Deep Analysis (`ask_deep_analysis_question`)
+### 2. Deep Analysis (`initiate_analysis` + `monitor_analysis`)
 
 **Use when:**
 
@@ -62,15 +63,19 @@ Both take the same field parameters.
 ```
 User asks a data question
     │
+    ├─► User asks to explain / drill into a step from a prior analysis?
+    │       └─► get_analysis_step_details (step_id from monitor_analysis)
+    │           NOTE: does NOT return SQL — use get_sql_from_fields for that
+    │
     ├─► Do you know the exact field names?
     │       │
     │       ├─► YES → get_data_from_fields (structured, deterministic)
     │       │         (or get_sql_from_fields to preview SQL without executing)
     │       │
-    │       └─► NO → ask_deep_analysis_question (plain English, any complexity)
+    │       └─► NO → initiate_analysis + monitor_analysis (plain English, any complexity)
     │
     └─► Plain English question / investigation / "why" / trends?
-            └─► ask_deep_analysis_question
+            └─► initiate_analysis + monitor_analysis
 ```
 
 ---
@@ -180,39 +185,63 @@ Filters use standard comparison expressions: `=`, `>`, `<`, `IN (...)`, `ILIKE`,
 
 ## Method 2: Deep Analysis
 
-### ask_deep_analysis_question
+### initiate_analysis + monitor_analysis
 
-Call with:
+Deep analysis is a two-step async process:
+
+**Step 1 — start the analysis:**
+
+Call `initiate_analysis` with:
 
 - `question` (required): the analysis question
-- `agent` (optional): agent name to use as analysis context — use `list_agents` to discover available agents and their associated domains
-- `conversation_id` (optional): ID from a previous deep analysis call, for follow-up questions
+- `agent` (required for new conversations): agent name — use `list_agents` to discover available agents and their associated domains
+- `conversation_id` (optional): ID from a previous call, for follow-up questions
+
+Returns a `conversation_id` immediately.
+
+**Step 2 — poll until done:**
+
+Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is `"DONE"`. Each call returns only new messages since the last call. Progress messages include `step_start` and `step_insight` entries, each carrying a `step_id` (e.g. `"STEP/5"`). Summarize key progress for the user while waiting.
+
+When `status` is `"DONE"`, the final user-facing report is in the `responses` array.
 
 ```
-question: "Analyze the relationship between host response time and review scores. Are there significant patterns?"
-agent: "my_agent"
+# Example
+initiate_analysis(question="Analyze revenue by cuisine type", agent="my_agent")
+→ { conversation_id: "abc123" }
+
+monitor_analysis(conversation_id="abc123")  # repeat until status == DONE
+→ { status: "DONE", responses: [{ text: "..." }] }
 ```
-
-Returns:
-
-- Markdown analysis report with findings
-- Supporting data
-- Suggested follow-up questions
-- `conversation_id` for continuing the conversation
 
 ### After Deep Analysis: Display the UI Link
 
-After a successful `ask_deep_analysis_question` call, the response includes a `ui_url` field. **Always display this URL to the user** so they can view the full analysis in the Honeydew application.
+The final response may include a `ui_url` field. **Always display this URL to the user** if present so they can view the full analysis in the Honeydew application.
 
 ### Follow-up Questions
 
-Use `conversation_id` from the previous response to ask follow-up questions that build on the prior analysis:
+Use `conversation_id` from the previous analysis to ask follow-up questions that build on prior state:
 
 ```
-question: "Now break this down by room type — does the pattern hold across all types?"
-agent: "my_agent"
-conversation_id: "<id from previous response>"
+initiate_analysis(
+  question="Now break this down by room type — does the pattern hold?",
+  conversation_id="abc123"
+)
 ```
+
+### Explaining a Prior Analysis Step
+
+When the user asks to explain, review, or drill into a specific step (e.g., "how was that calculated?", "explain the cuisine breakdown", "what happened in step 5"):
+
+1. Identify the `step_id` from `monitor_analysis` progress messages (e.g. `"STEP/5"`)
+2. Call `get_analysis_step_details` with `conversation_id` and `step_id`
+
+Returns:
+- The semantic query used (attributes, metrics, filters)
+- Context resolved (which entities/fields Honeydew selected)
+- Data results from that step
+
+**Does NOT return SQL.** To get the SQL for a step, take the attributes and metrics from the step details and call `get_sql_from_fields` with those same fields.
 
 ### Example Questions
 
@@ -227,6 +256,12 @@ conversation_id: "<id from previous response>"
 - "Identify unusual patterns in listing availability over the past year."
 - "What are the characteristics of top-performing listings?"
 
+**Step explanation (use `get_analysis_step_details`, not a new question):**
+- "How was that calculated?"
+- "Explain the cuisine breakdown."
+- "Show me what happened in that step."
+- "What fields were used there?"
+
 ---
 
 ## Combining Methods
@@ -235,7 +270,7 @@ For complex tasks, combine methods in sequence:
 
 1. **Discover** — Use `list_entities` / `get_entity` to understand the model
 2. **Query** — Use `get_data_from_fields` for precise, targeted queries
-3. **Investigate** — Use `ask_deep_analysis_question` for root cause or trend analysis
+3. **Investigate** — Use `initiate_analysis` + `monitor_analysis` for root cause or trend analysis
 
 ### Example Workflow
 
@@ -244,7 +279,7 @@ User: "Help me understand pricing patterns for Airbnb listings."
 1. Discover entities: `list_entities` → find `detailed_listings`
 2. Explore fields: `get_entity` for `detailed_listings` → find `price`, `room_type`, `neighbourhood_cleansed`
 3. Targeted query: `get_data_from_fields` → price distribution by neighbourhood for Entire homes only
-4. Deep dive: `ask_deep_analysis_question` → "What factors most influence listing price? Analyze correlations with room type, location, amenities, and reviews."
+4. Deep dive: `initiate_analysis` → "What factors most influence listing price? Analyze correlations with room type, location, amenities, and reviews."
 
 ---
 
@@ -290,6 +325,7 @@ This pattern is useful for:
 - **Start with discovery** — always check `list_entities` / `get_entity` before building queries, so you reference real fields
 - **Use structured queries for precision** — when you know the fields, `get_data_from_fields` gives you full control and reproducible results
 - **Use deep analysis for insight** — when the question is about "why" or requires investigating multiple dimensions
+- **Explain a prior step** — use `get_analysis_step_details` with the `step_id`; follow up with `get_sql_from_fields` if the user wants SQL (step details do not include SQL)
 - **Paginate large results** — use `limit` and `offset` in `get_data_from_fields` to avoid overwhelming output
 - **Show SQL when debugging** — use `get_sql_from_fields` to inspect the generated query
 - **Reference fields correctly** — always use `entity.field_name` syntax in field parameters
