@@ -75,16 +75,46 @@ datatype: number
 sql: COUNT(orders.order_id)
 ```
 
-## Distinct count
+## Distinct count — distinct customers across orders
 
 Call `create_object` with yaml_text:
+
+**Simple count** — total customers (default):
 
 ```yaml
 type: metric
 entity: orders
-name: unique_customers
-display_name: Unique Customers
-description: Count of distinct customers
+name: customer_count
+display_name: Customer Count
+description: Total number of customers
+owner: data-team
+datatype: number
+sql: customers.count
+```
+
+**With join-forcing filter** — when you specifically want customers who have at least one
+order, use a `FILTER` that references a per-row column on the source entity. This forces
+Honeydew to join orders to customers on the relation key:
+
+```yaml
+type: metric
+entity: orders
+name: customers_with_orders
+display_name: Customers with Orders
+description: Count of customers who have placed at least one order
+owner: data-team
+datatype: number
+sql: customers.count FILTER (WHERE orders.order_id IS NOT NULL)
+```
+
+**Fallback** — only when there's no relation or no count metric on the related entity:
+
+```yaml
+type: metric
+entity: orders
+name: customers_with_orders
+display_name: Customers with Orders
+description: Count of customers who have placed at least one order
 owner: data-team
 datatype: number
 sql: COUNT(DISTINCT orders.customer_id)
