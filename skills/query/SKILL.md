@@ -215,7 +215,8 @@ Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is 
 **Report progress when it's meaningful to the user** — not every poll, but not silently either. Use judgement:
 
 - On `interpretation` / `plan`: tell the user what the analysis intends to do
-- On `step_insight` with a substantive finding: post a one-liner labelled with the step description (if available) or "Step #N" (1-based) — e.g. *"Step #1: 58 menu items found, top is The King Combo at $431M"*
+- On every `step_insight` with a substantive finding: post a one-liner labelled with the step description (if available) or "Step #N" (1-based) — e.g. *"Step #1: 58 menu items found, top is The King Combo at $431M"*
+- If several steps have passed without a user-facing update, post a brief aggregate — e.g. *"Completed 3 steps: analyzed pricing by neighbourhood, computed averages, filtered outliers"* — so the user knows progress is being made
 - On internal errors, retries, or backtracking steps: skip reporting — the user doesn't need to know the agent corrected itself, only that meaningful progress is being made
 
 When `status` is `"DONE"`, the final user-facing report is in the `responses` array.
