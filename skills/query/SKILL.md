@@ -215,8 +215,8 @@ Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is 
 **Report progress when it's meaningful to the user** — not every poll, but not silently either. Use judgement:
 
 - On `interpretation` / `plan`: tell the user what the analysis intends to do
-- On every `step_insight` with a substantive finding: post a one-liner labelled with the step description (if available) or "Step #N" (1-based) — e.g. *"Step #1: 58 menu items found, top is The King Combo at $431M"*
-- If several steps have passed without a user-facing update, post a brief aggregate — e.g. *"Completed 3 steps: analyzed pricing by neighbourhood, computed averages, filtered outliers"* — so the user knows progress is being made
+- On every `step_insight` with a substantive finding: post a one-liner describing what was found — e.g. *"58 menu items found, top is The King Combo at $431M"*
+- If several steps have passed without a user-facing update, post a brief aggregate — e.g. *"Analyzed pricing by neighbourhood, computed averages, filtered outliers"* — so the user knows progress is being made
 - On internal errors, retries, or backtracking steps: skip reporting — the user doesn't need to know the agent corrected itself, only that meaningful progress is being made
 
 When `status` is `"DONE"`, the final user-facing report is in the `responses` array.
@@ -231,7 +231,7 @@ monitor_analysis(conversation_id="abc123")
 → interpretation + plan received → tell user what the analysis will do
 
 monitor_analysis(conversation_id="abc123")
-→ step insight received → report: "Step #1: Top item is Indian at $1B"
+→ step insight received → report: "Top item is Indian at $1B"
 
 monitor_analysis(conversation_id="abc123")
 → step insight received → report: "% contribution: Indian leads at 34%, followed by Italian at 22%"
@@ -364,3 +364,4 @@ This pattern is useful for:
 - **Paginate large results** — use `limit` and `offset` in `get_data_from_fields` to avoid overwhelming output
 - **Show SQL when debugging** — use `get_sql_from_fields` to inspect the generated query
 - **Reference fields correctly** — always use `entity.field_name` syntax in field parameters
+- **Present results clearly** — format tables, highlight key numbers, and summarize the takeaway in plain language. If your environment supports charts or visualizations, proactively render them when it would clearly aid understanding (e.g. a bar chart for comparisons, a line chart for trends, a dashboard for multi-result analyses); offer when it might help but isn't obvious. Not all agents have this capability — only do this if you actually can.
