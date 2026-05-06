@@ -197,7 +197,7 @@ Call `initiate_analysis` with:
 - `agent` (required for new conversations): agent name — use `list_agents` to discover available agents and their associated domains
 - `conversation_id` (optional): ID from a previous call, for follow-up questions
 
-Returns a `conversation_id` immediately.
+Returns a `conversation_id` immediately, and optionally a `ui_url` — **display this URL to the user** if present so they can follow the analysis in the Honeydew application.
 
 **Step 2 — poll until done:**
 
