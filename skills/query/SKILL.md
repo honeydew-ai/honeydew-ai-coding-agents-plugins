@@ -247,7 +247,7 @@ The final response may include a `ui_url` field. **Always display this URL to th
 
 ### Follow-up Questions
 
-Use `conversation_id` from the previous analysis to ask follow-up questions that build on prior state:
+Use `conversation_id` from the previous analysis to ask follow-up questions that build on prior state. **Start a new conversation (omit `conversation_id`) when the topic changes completely** — reusing a conversation for an unrelated question carries stale context into the new analysis and can skew results.
 
 ```
 initiate_analysis(
