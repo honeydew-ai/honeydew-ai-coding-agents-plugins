@@ -197,7 +197,7 @@ Call `initiate_analysis` with:
 - `agent` (required for new conversations): agent name — use `list_agents` to discover available agents and their associated domains
 - `conversation_id` (optional): ID from a previous call, for follow-up questions
 
-Returns a `conversation_id` immediately, and optionally a `ui_url` — **display this URL to the user** if present so they can follow the analysis in the Honeydew application.
+Returns a `conversation_id` immediately. New conversations also return a `ui_url` — **always display this URL to the user** so they can follow the analysis in the Honeydew application.
 
 **Step 2 — poll until done:**
 
@@ -223,7 +223,7 @@ When `status` is `"DONE"`, the final user-facing report is in the `responses` ar
 ```
 # Example
 initiate_analysis(question="Analyze revenue by cuisine type", agent="my_agent")
-→ { conversation_id: "abc123" }
+→ { conversation_id: "abc123", ui_url: "https://..." }
 
 # Poll loop — report to user after each call that has new content
 monitor_analysis(conversation_id="abc123")
@@ -240,10 +240,6 @@ monitor_analysis(conversation_id="abc123")
 monitor_analysis(conversation_id="abc123")
 → { status: "DONE", responses: [{ text: "..." }] }
 ```
-
-### After Deep Analysis: Display the UI Link
-
-The final response may include a `ui_url` field. **Always display this URL to the user** if present so they can view the full analysis in the Honeydew application.
 
 ### Follow-up Questions
 
