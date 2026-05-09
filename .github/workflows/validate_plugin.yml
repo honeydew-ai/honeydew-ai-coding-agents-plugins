@@ -6,6 +6,9 @@ on:
             - ".agents/plugins/**"
             - ".claude-plugin/**"
             - ".codex-plugin/**"
+            - ".cursor-plugin/**"
+            - ".github/plugin/**"
+            - "gemini-extension.json"
             - "skills/**"
             - "hooks/**"
             - "AGENTS.md"
@@ -26,3 +29,6 @@ jobs:
 
             - name: Validate plugin
               run: claude plugin validate .
+
+            - name: Validate versions in sync
+              run: bash scripts/validate-versions.sh
