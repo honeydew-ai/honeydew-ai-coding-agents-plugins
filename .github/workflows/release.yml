@@ -22,7 +22,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${GITHUB_REF_NAME}"
-          ZIP_FILES=(dist/*.zip)
+          ZIP_FILES=(dist/honeydew-ai-claude-*.zip)
           if [[ ${#ZIP_FILES[@]} -ne 1 ]] || [[ ! -f "${ZIP_FILES[0]}" ]]; then
             echo "error: expected exactly one zip in dist/" >&2
             exit 1
