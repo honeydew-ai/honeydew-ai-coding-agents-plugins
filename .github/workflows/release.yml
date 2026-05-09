@@ -27,6 +27,9 @@ jobs:
             echo "error: expected exactly one zip in dist/" >&2
             exit 1
           fi
-          gh release create "${TAG}" "${ZIP_FILES[0]}" \
+          VERSIONED_ZIP="${ZIP_FILES[0]}"
+          FIXED_ZIP="dist/honeydew-ai-claude.zip"
+          cp "${VERSIONED_ZIP}" "${FIXED_ZIP}"
+          gh release create "${TAG}" "${VERSIONED_ZIP}" "${FIXED_ZIP}" \
             --title "${TAG}" \
             --generate-notes
