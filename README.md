@@ -120,7 +120,9 @@ The `honeydew-ai` plugin includes 11 skills:
 
 ## Building a Release
 
-To produce a zip for upload to the claude.ai private marketplace:
+Release zips are built automatically by CI and attached to each [GitHub Release](https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins/releases). Download `honeydew-ai-claude-<version>.zip` directly from the latest release and upload it to the claude.ai private marketplace.
+
+To build a zip locally (e.g. for testing):
 
 ```bash
 ./scripts/build-release-claude.sh

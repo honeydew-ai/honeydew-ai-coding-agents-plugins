@@ -1,0 +1,36 @@
+name: Auto-tag on version bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '.claude-plugin/plugin.json'
+
+permissions:
+  contents: write
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: |
+          VERSION=$(sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' .claude-plugin/plugin.json | head -n1)
+          echo "value=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Create tag if new
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ steps.version.outputs.value }}"
+          if git ls-remote --tags origin "${TAG}" | grep -q "${TAG}"; then
+            echo "Tag ${TAG} already exists, skipping."
+          else
+            git tag "${TAG}"
+            git push origin "${TAG}"
+            echo "Created and pushed ${TAG}"
+          fi

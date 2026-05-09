@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release zip
+        run: bash scripts/build-release-claude.sh
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          ZIP=$(ls dist/*.zip)
+          gh release create "${TAG}" "${ZIP}" \
+            --title "${TAG}" \
+            --generate-notes
