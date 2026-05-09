@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.8] - 2026-05-09
+
+### Added
+
+- Permanent download URL for the Claude marketplace zip: `releases/latest/download/honeydew-ai-claude.zip`
+
 ## [1.0.7] - 2026-05-09
 
 ### Added
