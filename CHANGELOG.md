@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.7] - 2026-05-09
+
+### Added
+
+- Automated GitHub Releases: merging a version bump to `main` now automatically creates a git tag and publishes a GitHub Release with the Claude marketplace zip attached
+
 ## [1.0.6] - 2026-05-05
 
 ### Changed
