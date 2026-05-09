@@ -125,7 +125,8 @@ The `honeydew-ai` plugin includes 11 skills:
 The `honeydew-ai-claude-<version>.zip` artifact is used to install this plugin via the [claude.ai](https://claude.ai) web interface as a private marketplace plugin. It packages the plugin in the layout claude.ai expects: `.claude-plugin/plugin.json` at the zip root, alongside `.mcp.json`, `hooks/`, `assets/`, and all skill markdown files.
 
 **To install on claude.ai:**
-1. Download `honeydew-ai-claude-<version>.zip` from the [latest GitHub Release](https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins/releases/latest)
+1. Download the zip — permanent link to the latest version:
+   `https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins/releases/latest/download/honeydew-ai-claude.zip`
 2. In claude.ai, go to **Settings → Plugins → Add plugin → Upload zip**
 3. Upload the zip — the plugin will appear in your private marketplace
 
