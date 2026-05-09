@@ -30,18 +30,22 @@ The repo root IS the single `honeydew-ai` plugin. Codex marketplace entries must
 
 ## Version Bump Checklist
 
+**Source of truth:** `.claude-plugin/plugin.json` — update this first. CI (`validate-versions.sh`) checks that all other version fields match it.
+
 When releasing a new version, update **all** of these files:
 
-1. `CHANGELOG.md` — add a new entry at the top (format: `## [X.Y.Z] - YYYY-MM-DD`)
-2. `.claude-plugin/marketplace.json` — `metadata.version` + plugin `version`
-3. `.cursor-plugin/marketplace.json` — `metadata.version` + plugin `version`
-4. `.github/plugin/marketplace.json` — `metadata.version` + plugin `version`
-5. `.agents/plugins/marketplace.json` — marketplace entry if install policy/category/source changes (Codex source path must stay `./plugins/honeydew-ai`)
-6. `.claude-plugin/plugin.json` — `version`
+1. `.claude-plugin/plugin.json` — `version` **(source of truth — update this first)**
+2. `CHANGELOG.md` — add a new entry at the top (format: `## [X.Y.Z] - YYYY-MM-DD`)
+3. `.claude-plugin/marketplace.json` — `metadata.version` + plugin `version`
+4. `.cursor-plugin/marketplace.json` — `metadata.version` + plugin `version`
+5. `.github/plugin/marketplace.json` — `metadata.version` + plugin `version`
+6. `.agents/plugins/marketplace.json` — marketplace entry if install policy/category/source changes (Codex source path must stay `./plugins/honeydew-ai`)
 7. `.cursor-plugin/plugin.json` — `version`
 8. `.github/plugin/plugin.json` — `version`
 9. `.codex-plugin/plugin.json` — `version`
 10. `gemini-extension.json` — `version`
+
+Run `./scripts/validate-versions.sh` locally to confirm all files are in sync before pushing.
 
 ## New Skill Checklist
 
@@ -84,3 +88,4 @@ When adding a new skill, update **all** of these:
 ## CI
 
 - GitHub Actions validates YAML frontmatter on PRs (uses `bun` + `.github/scripts/validate-frontmatter.ts`)
+- GitHub Actions validates plugin structure and version consistency on PRs (`scripts/validate-versions.sh`)
