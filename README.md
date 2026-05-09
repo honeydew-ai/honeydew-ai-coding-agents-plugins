@@ -118,6 +118,25 @@ The `honeydew-ai` plugin includes 11 skills:
 - Databricks
 - BigQuery
 
+## Building a Release
+
+### Claude-specific zip (claude.ai private marketplace)
+
+The `honeydew-ai-claude-<version>.zip` artifact is used to install this plugin via the [claude.ai](https://claude.ai) web interface as a private marketplace plugin. It packages the plugin in the layout claude.ai expects: `.claude-plugin/plugin.json` at the zip root, alongside `.mcp.json`, `hooks/`, `assets/`, and all skill markdown files.
+
+**To install on claude.ai:**
+1. Download `honeydew-ai-claude-<version>.zip` from the [latest GitHub Release](https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins/releases/latest)
+2. In claude.ai, go to **Settings → Plugins → Add plugin → Upload zip**
+3. Upload the zip — the plugin will appear in your private marketplace
+
+Release zips are built automatically by CI and attached to each GitHub Release. To build one locally (e.g. for testing):
+
+```bash
+./scripts/build-release-claude.sh
+```
+
+This generates `dist/honeydew-ai-claude-<version>.zip` from the repo root.
+
 ## License
 
 Apache 2.0 — see [LICENSE](LICENSE) for details.
