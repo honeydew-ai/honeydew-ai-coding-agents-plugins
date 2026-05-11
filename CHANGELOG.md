@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.9] - 2026-05-11
+
+### Changed
+
+- **Update Honeydew MCP server URL** — all `.mcp.json` configurations now point to `https://mcp.honeydew.cloud/mcp`
+
 ## [1.0.8] - 2026-05-09
 
 ### Added

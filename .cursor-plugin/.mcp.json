@@ -6,7 +6,7 @@
     },
     "honeydew": {
       "type": "http",
-      "url": "https://api.honeydew.cloud/mcp"
+      "url": "https://mcp.honeydew.cloud/mcp"
     }
   }
 }
