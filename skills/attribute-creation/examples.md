@@ -9,7 +9,6 @@ type: calculated_attribute
 entity: orders
 name: net_price
 display_name: Net Price
-description: Order amount after applying discount
 owner: data-team
 datatype: float
 sql: |-
@@ -25,7 +24,7 @@ type: calculated_attribute
 entity: users
 name: is_high_spender
 display_name: Is High Spender
-description: Indicates if user has spent more than $1000 in total
+description: Threshold defined by Marketing; used for premium campaign targeting
 owner: data-team
 datatype: bool
 sql: |-
@@ -41,7 +40,7 @@ type: calculated_attribute
 entity: orders
 name: order_size_tier
 display_name: Order Size Tier
-description: Categorizes orders by amount
+description: Thresholds set by Operations for fulfillment routing; Small < $100, Medium < $1000, Large ≥ $1000
 owner: data-team
 datatype: string
 sql: |-
@@ -61,7 +60,6 @@ type: calculated_attribute
 entity: line_items
 name: extended_cost
 display_name: Extended Cost
-description: Line item quantity times product unit cost
 owner: data-team
 datatype: float
 sql: |-
@@ -77,7 +75,6 @@ type: calculated_attribute
 entity: orders
 name: order_month
 display_name: Order Month
-description: Calendar month of the order
 owner: data-team
 datatype: date
 sql: |-
@@ -94,7 +91,7 @@ type: calculated_attribute
 entity: customers
 name: revenue_rank
 display_name: Revenue Rank
-description: Customer rank by total revenue within region
+description: Ranked within each region separately; rank 1 = highest revenue customer in that region
 owner: data-team
 datatype: number
 sql: |-
@@ -110,7 +107,6 @@ type: calculated_attribute
 entity: orders
 name: cumulative_revenue
 display_name: Cumulative Revenue
-description: Running total of order amounts
 owner: data-team
 datatype: float
 sql: |-
@@ -129,7 +125,6 @@ type: calculated_attribute
 entity: orders
 name: shipping_city
 display_name: Shipping City
-description: City extracted from shipping JSON metadata
 owner: data-team
 datatype: string
 sql: |-
@@ -145,7 +140,7 @@ type: calculated_attribute
 entity: campaigns
 name: conversion_rate
 display_name: Conversion Rate
-description: Conversions divided by impressions (safe division)
+description: Returns 0 (not null) when there are no impressions; campaigns with no spend are included in aggregations
 owner: data-team
 datatype: float
 sql: |-
@@ -162,7 +157,6 @@ type: calculated_attribute
 entity: orders
 name: net_price
 display_name: Net Price
-description: Order amount after discount and fees
 owner: data-team
 datatype: float
 sql: |-

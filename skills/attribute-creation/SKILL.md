@@ -67,6 +67,7 @@ folder: <optional folder path>
 - `owner` — **CRITICAL: always set** (email or team name)
 - `datatype` — **CRITICAL: always set explicitly**
 - `sql` — the expression
+- `description` — business context **for a non-technical user**: WHY this attribute exists, which business team defines the threshold/logic, known caveats, or governance notes. **Do NOT** describe the SQL expression or restate what the name already says. If there's nothing meaningful to add beyond the name, omit it entirely.
 
 ### Update: update_object
 
@@ -118,6 +119,7 @@ Search for topics like: "calculated attributes", "attribute types", "multi-entit
 
 ## Best Practices
 
+- **Description = business context only, or omit.** Never use it to explain the SQL expression or how the attribute is derived — that's visible in the `sql` field. A good description answers "why does this attribute exist?" or "what should a business user know about this value?" (e.g., who owns the threshold definition, known edge cases, data quality caveats). If there's nothing to add beyond the name, leave the field out entirely.
 - **Reuse existing attributes — don't repeat logic.**
   If a calculated attribute already exists on the entity (or you just created one), reference it by name
   (`entity.attribute_name`) rather than inlining its SQL expression. This keeps definitions DRY and ensures changes propagate.

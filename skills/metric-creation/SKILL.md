@@ -91,7 +91,7 @@ sql: |-
 **Optional fields:**
 
 - `display_name` — human readable name
-- `description` — business context
+- `description` — business context **for a non-technical user**: WHY this metric matters, which business team owns the definition, known caveats, or governance notes. **Do NOT** describe the SQL or how it's calculated — that's visible in the `sql` field. **Do NOT** restate the metric name or display name. If there's nothing meaningful to add beyond the name, omit it entirely.
 - `format_string` — display format (e.g., `$#,##0.00`)
 - `labels` — categorization tags
 - `folder` — organizational path
@@ -247,6 +247,7 @@ Search for topics like: "metrics", "aggregation", "derived metrics", "fixed grou
   Otherwise, use `COUNT(entity.key_field)` on the primary key. No `DISTINCT` needed — primary
   keys are unique by definition.
 - **Name metrics after the business concept**, not the SQL. `gross_margin` is better than `revenue_minus_cogs_divided_by_revenue`.
+- **Description = business context only, or omit.** Never use it to explain how the metric is calculated or what aggregation it uses — that's visible in the `sql` field. A good description answers "why does this metric exist?" or "what should a business user know about this number?" (e.g., ownership, caveats, governance). If there's nothing to add beyond the name, leave the field out entirely.
 - **Use Derived metrics for ratios.** Build numerator and denominator as separate metrics first.
 - **Use fully qualified column names.** `orders.amount`, not just `amount`.
 - **Ignore grouping requests.** Build the aggregation; users add dimensions later.
