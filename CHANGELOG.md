@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.10] - 2026-05-14
+
+### Changed
+
+- **Improve description field guidance** — `description` in metrics and attributes should contain business context for non-technical users (WHY it exists, ownership, caveats) and be omitted when there's nothing to add beyond the name. Updated both SKILL.md files and examples to demonstrate the pattern.
+
 ## [1.0.9] - 2026-05-11
 
 ### Changed
