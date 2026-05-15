@@ -19,7 +19,6 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 | **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 | **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
-| **Give feedback on analysis** | `provide_analysis_feedback`                  | User expresses satisfaction or dissatisfaction with a completed analysis.        |
 
 ---
 
@@ -71,9 +70,6 @@ User asks a data question
     │
     ├─► User wants to browse past conversations / find a prior analysis?
     │       └─► list_analysis_chats (paginated list, newest first)
-    │
-    ├─► User gives positive or negative feedback on a completed analysis?
-    │       └─► provide_analysis_feedback (conversation_id + feedback text)
     │
     ├─► Do you know the exact field names?
     │       │
@@ -227,7 +223,13 @@ Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is 
 - If several steps have passed without a user-facing update, post a brief aggregate — e.g. *"Analyzed pricing by neighbourhood, computed averages, filtered outliers"* — so the user knows progress is being made
 - On internal errors, retries, or backtracking steps: skip reporting — the user doesn't need to know the agent corrected itself, only that meaningful progress is being made
 
-When `status` is `"DONE"`, the final user-facing report is in the `responses` array.
+When `status` is `"DONE"`, the final user-facing report is in the `responses` array. If the user then expresses satisfaction or dissatisfaction with the result, call `provide_analysis_feedback` with the `conversation_id`:
+
+- **Positive**: a short affirmative string, e.g. `"Good"`
+- **Negative**: `<Reason>: <details>` where `Reason` is one of `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other` — e.g. `"Data Issue: revenue figures don't match our BI tool"`
+- **Clear existing feedback**: pass `null`
+
+Trigger this when the user says things like: "that was correct", "that's wrong", "the data looks off", "great analysis", "this is incorrect because..."
 
 ```
 # Example
@@ -324,35 +326,6 @@ Use this when the user asks to:
 - "Show me my recent analyses"
 - "Find the analysis I ran last week on revenue"
 - "List all conversations in this workspace"
-
----
-
-## Providing Feedback on an Analysis
-
-### provide_analysis_feedback
-
-Set or clear feedback on a completed analysis conversation. There is one feedback entry per conversation (not per question) — it reflects the overall quality of the entire conversation.
-
-Call this after `monitor_analysis` completes when the user expresses satisfaction or dissatisfaction:
-
-- **Positive feedback**: short affirmative string, e.g. `"Good"` or `"Correct"`
-- **Negative feedback**: format `<Reason>: <details>` where `Reason` is one of: `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other`
-  - Example: `"Data Issue: revenue figures don't match our BI tool"`
-- **Clear feedback**: pass `null` as the feedback value
-
-```
-provide_analysis_feedback(
-  conversation_id="abc123",
-  feedback="Good"
-)
-
-provide_analysis_feedback(
-  conversation_id="abc123",
-  feedback="Wrong Judgement: the analysis attributed the drop to the wrong segment"
-)
-```
-
-Trigger this when the user says things like: "that was correct", "that's wrong", "the data looks off", "great analysis", "this is incorrect because..."
 
 ---
 
