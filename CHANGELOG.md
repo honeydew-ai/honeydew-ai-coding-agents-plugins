@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.1.0] - 2026-05-15
+
+### Added
+
+- **New `conversation-review` skill** — guides semantic/context layer curators through bulk-reviewing past analysis conversations, categorizing user feedback into actionable improvement areas (missing metrics, wrong calculations, missing context items, etc.), and applying targeted changes to the semantic model or context layer on a branch.
+
 ## [1.0.11] - 2026-05-15
 
 ### Changed
