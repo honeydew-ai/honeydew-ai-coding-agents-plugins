@@ -63,13 +63,6 @@ See the `workspace-branch` skill for the full reference. Key tools:
   - `EXACT` — uses the full string as-is, matches name or display name exactly
   - Use `entity.field` syntax to scope to fields within an entity (e.g. `customers.balance` finds `balance` on entities matching `customers`; `customers.` returns all fields of matching entities)
 
-### Analysis
-
-- `list_analysis_chats` — List past analysis conversations for the current workspace (paginated, newest first). Use `limit` and `offset` for pagination.
-- `provide_analysis_feedback` — Set or clear feedback on a completed analysis conversation. Use a short affirmative string for positive feedback (e.g. `"Good"`), or `<Reason>: <details>` for negative feedback where `Reason` is one of `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other`. Pass `null` to clear.
-
-For running analyses, see the **query** skill (`initiate_analysis`, `monitor_analysis`, `get_analysis_step_details`, `abort_analysis`).
-
 ### Agents & Context
 
 Honeydew has two layers: the **semantic layer** (entities, metrics, attributes, relations, domains — the data model and business logic such as metric calculations) and the **context layer** (agents and their associated context items — instructions, skills, knowledge, and memory — that shape how the AI analyst behaves).
