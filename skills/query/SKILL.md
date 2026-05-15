@@ -19,7 +19,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 | **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 | **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
-| **Rate an analysis**      | `provide_analysis_feedback`                       | User expresses satisfaction or dissatisfaction with a completed analysis.        |
+| **Give feedback on analysis** | `provide_analysis_feedback`                  | User expresses satisfaction or dissatisfaction with a completed analysis.        |
 
 ---
 
@@ -72,7 +72,7 @@ User asks a data question
     ├─► User wants to browse past conversations / find a prior analysis?
     │       └─► list_analysis_chats (paginated list, newest first)
     │
-    ├─► User rates or gives feedback on a completed analysis?
+    ├─► User gives positive or negative feedback on a completed analysis?
     │       └─► provide_analysis_feedback (conversation_id + feedback text)
     │
     ├─► Do you know the exact field names?
