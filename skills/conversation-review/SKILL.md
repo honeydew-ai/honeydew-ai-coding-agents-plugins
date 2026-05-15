@@ -33,7 +33,7 @@ list_analysis_chats(limit=50, offset=0)
 Paginate with `offset` until you have covered the desired time window or conversation count. For each conversation, note:
 
 - `conversation_id`
-- `title` (a user-friendly summary of the conversation)
+- `title`
 - `feedback` (the stored feedback text, if any)
 - `agent` and `domain`
 - `created_at` and `created_by`
