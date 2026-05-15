@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.0.11] - 2026-05-15
+
+### Changed
+
+- **Add `list_analysis_chats` and `provide_analysis_feedback` to query skill** — the `query` skill now covers browsing past analysis conversations and submitting feedback on completed analyses. Updated `model-exploration` tool reference to include these tools.
+
 ## [1.0.10] - 2026-05-14
 
 ### Changed

@@ -18,6 +18,8 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 | **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | You know the exact fields. Deterministic, full control.                          |
 | **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
+| **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
+| **Rate an analysis**      | `provide_analysis_feedback`                       | User expresses satisfaction or dissatisfaction with a completed analysis.        |
 
 ---
 
@@ -66,6 +68,12 @@ User asks a data question
     ├─► User asks to explain / drill into a step from a prior analysis?
     │       └─► get_analysis_step_details (step_id from monitor_analysis)
     │           Returns semantic query, data results, and SQL for that step
+    │
+    ├─► User wants to browse past conversations / find a prior analysis?
+    │       └─► list_analysis_chats (paginated list, newest first)
+    │
+    ├─► User rates or gives feedback on a completed analysis?
+    │       └─► provide_analysis_feedback (conversation_id + feedback text)
     │
     ├─► Do you know the exact field names?
     │       │
@@ -295,6 +303,56 @@ References in the response can be expanded for deeper inspection:
 - "Explain the cuisine breakdown."
 - "Show me what happened in that step."
 - "What fields were used there?"
+
+---
+
+## Browsing Past Analyses
+
+### list_analysis_chats
+
+Returns a paginated list of past analysis conversations for the current workspace, sorted newest first.
+
+- Admins see all conversations; non-admins see only their own.
+- Each entry includes: `conversation_id`, title, domain, agent, creation time, user feedback, and the display name of the user who created it.
+- Use `limit` and `offset` for pagination.
+
+```
+list_analysis_chats(limit=20, offset=0)
+```
+
+Use this when the user asks to:
+- "Show me my recent analyses"
+- "Find the analysis I ran last week on revenue"
+- "List all conversations in this workspace"
+
+---
+
+## Providing Feedback on an Analysis
+
+### provide_analysis_feedback
+
+Set or clear feedback on a completed analysis conversation. There is one feedback entry per conversation (not per question) — it reflects the overall quality of the entire conversation.
+
+Call this after `monitor_analysis` completes when the user expresses satisfaction or dissatisfaction:
+
+- **Positive feedback**: short affirmative string, e.g. `"Good"` or `"Correct"`
+- **Negative feedback**: format `<Reason>: <details>` where `Reason` is one of: `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other`
+  - Example: `"Data Issue: revenue figures don't match our BI tool"`
+- **Clear feedback**: pass `null` as the feedback value
+
+```
+provide_analysis_feedback(
+  conversation_id="abc123",
+  feedback="Good"
+)
+
+provide_analysis_feedback(
+  conversation_id="abc123",
+  feedback="Wrong Judgement: the analysis attributed the drop to the wrong segment"
+)
+```
+
+Trigger this when the user says things like: "that was correct", "that's wrong", "the data looks off", "great analysis", "this is incorrect because..."
 
 ---
 
