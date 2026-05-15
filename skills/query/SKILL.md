@@ -18,6 +18,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 | **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | You know the exact fields. Deterministic, full control.                          |
 | **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
+| **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
 
 ---
 
@@ -66,6 +67,9 @@ User asks a data question
     ├─► User asks to explain / drill into a step from a prior analysis?
     │       └─► get_analysis_step_details (step_id from monitor_analysis)
     │           Returns semantic query, data results, and SQL for that step
+    │
+    ├─► User wants to browse past conversations / find a prior analysis?
+    │       └─► list_analysis_chats (paginated list, newest first)
     │
     ├─► Do you know the exact field names?
     │       │
@@ -219,7 +223,13 @@ Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is 
 - If several steps have passed without a user-facing update, post a brief aggregate — e.g. *"Analyzed pricing by neighbourhood, computed averages, filtered outliers"* — so the user knows progress is being made
 - On internal errors, retries, or backtracking steps: skip reporting — the user doesn't need to know the agent corrected itself, only that meaningful progress is being made
 
-When `status` is `"DONE"`, the final user-facing report is in the `responses` array.
+When `status` is `"DONE"`, the final user-facing report is in the `responses` array. If the user then expresses satisfaction or dissatisfaction with the result, call `provide_analysis_feedback` with the `conversation_id`:
+
+- **Positive**: a short affirmative string, e.g. `"Good"`
+- **Negative**: `<Reason>: <details>` where `Reason` is one of `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other` — e.g. `"Data Issue: revenue figures don't match our BI tool"`
+- **Clear existing feedback**: pass `null`
+
+Trigger this when the user says things like: "that was correct", "that's wrong", "the data looks off", "great analysis", "this is incorrect because..."
 
 ```
 # Example
@@ -295,6 +305,27 @@ References in the response can be expanded for deeper inspection:
 - "Explain the cuisine breakdown."
 - "Show me what happened in that step."
 - "What fields were used there?"
+
+---
+
+## Browsing Past Analyses
+
+### list_analysis_chats
+
+Returns a paginated list of past analysis conversations for the current workspace, sorted newest first.
+
+- Admins see all conversations; non-admins see only their own.
+- Each entry includes: `conversation_id`, title, domain, agent, creation time, user feedback, and the display name of the user who created it.
+- Use `limit` and `offset` for pagination.
+
+```
+list_analysis_chats(limit=20, offset=0)
+```
+
+Use this when the user asks to:
+- "Show me my recent analyses"
+- "Find the analysis I ran last week on revenue"
+- "List all conversations in this workspace"
 
 ---
 
