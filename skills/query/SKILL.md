@@ -19,6 +19,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 | **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 | **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
+| **Read a past conversation** | `get_stored_conversation`                      | User wants to read or review the full content of a specific past conversation.   |
 
 ---
 
@@ -70,6 +71,9 @@ User asks a data question
     │
     ├─► User wants to browse past conversations / find a prior analysis?
     │       └─► list_analysis_chats (paginated list, newest first)
+    │
+    ├─► User wants to read the content of a specific past conversation?
+    │       └─► get_stored_conversation (conversation_id from list_analysis_chats)
     │
     ├─► Do you know the exact field names?
     │       │
@@ -326,6 +330,19 @@ Use this when the user asks to:
 - "Show me my recent analyses"
 - "Find the analysis I ran last week on revenue"
 - "List all conversations in this workspace"
+
+### get_stored_conversation
+
+Returns all messages from a past analysis conversation. Use this to read the full content of a specific conversation identified via `list_analysis_chats`.
+
+- `is_complete` in the response indicates whether the conversation reached a terminal state.
+- `with_step_ids: false` (default) — returns only final responses and plan/interpretation messages. Use this for a readable summary.
+- `with_step_ids: true` — also includes `step_start` and `step_insight` progress entries. Use this when you need to identify specific steps to pass to `get_analysis_step_details`.
+
+```
+get_stored_conversation(conversation_id="abc123")
+get_stored_conversation(conversation_id="abc123", with_step_ids=true)
+```
 
 ---
 

@@ -40,19 +40,23 @@ Paginate with `offset` until you have covered the desired time window or convers
 
 **Filter to conversations with feedback.** Skip conversations with no feedback unless the user explicitly wants to review all conversations.
 
-### 1.2 Get deeper context when needed
+### 1.2 Read the full conversation when needed
 
-If the feedback text alone is not enough to understand what went wrong, retrieve the analysis step details:
+If the feedback text alone is not enough to understand what went wrong, retrieve the full conversation content with `get_stored_conversation`:
 
 ```
-initiate_analysis(
-  question="Summarize what happened in conversation <conversation_id>",
-  conversation_id="<conversation_id>"
-)
-→ monitor_analysis until DONE
+get_stored_conversation(conversation_id="abc123")
 ```
 
-Or, if you know a specific step was problematic, call `get_analysis_step_details` with the `step_id` to see the semantic query, SQL, and data used in that step.
+This returns all final responses and plan/interpretation messages. Read these to understand what the AI actually did — what question it interpreted, what approach it took, and what it concluded.
+
+To also see individual analysis steps (useful when you want to identify which step produced wrong data), pass `with_step_ids: true`:
+
+```
+get_stored_conversation(conversation_id="abc123", with_step_ids=true)
+```
+
+This includes `step_start` and `step_insight` entries with `step_id` values you can then pass to `get_analysis_step_details` to retrieve the exact semantic query and SQL used in that step.
 
 ---
 
@@ -199,7 +203,8 @@ list_analysis_chats (paginate, collect all with feedback)
     ▼
 [For each conversation with feedback]
   → read feedback text
-  → optionally: get_analysis_step_details for context
+  → optionally: get_stored_conversation for full context
+  → optionally: get_analysis_step_details for a specific step
     │
     ▼
 Categorize feedback → produce categorization table
