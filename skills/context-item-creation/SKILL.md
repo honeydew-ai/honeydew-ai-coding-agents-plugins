@@ -58,9 +58,32 @@ If the information describes *how to compute something*, *what a value means mat
 
 ---
 
+## Before creating: where does this context belong?
+
+Context items are only one of three places organizational context reaches the AI analyst. Before drafting an item, check whether the fact belongs in one of the other two — both are already part of every relevant session automatically, with no glob configuration.
+
+| Where the context lives | When the AI sees it | Use for |
+|---|---|---|
+| **Field / entity `description` (AI metadata)** | Whenever that field or entity is in scope | The meaning of a field, its allowed values, synonyms for an entity — facts that travel with a single semantic object |
+| **Agent `description` + markdown body** | Every session of that agent | What the agent covers, user-perspective phrasing, agent-wide scope or tone |
+| **Context item** | Instructions: every prompt. Skills / knowledge / memory: only when retrieval matches. | Cross-cutting rules, on-demand playbooks, external pointers, historical events |
+
+**Routing examples:**
+- *"The `orders.status` codes mean: 'A' = active, 'L' = legacy (pre-2022 migration, treat as active), 'X' = test record."* → field `description` (non-SQL facts about allowed values). If the rule were "active means status in ('A','L')", that's logic → make it a calculated attribute, not a description.
+- *"Users call refunds 'returns' — recognize both terms."* → entity AI-metadata `synonyms`, not an instruction.
+- *"This agent only handles finance; revenue / margin / cogs questions route here."* → agent description + body, not a `**`-globbed instruction.
+- *"For every revenue question, prefer `orders.net_revenue` over `orders.gross_revenue`."* → instruction (cross-cutting, references existing semantic objects).
+- *"To investigate churn, segment by cohort then compare retention curves."* → skill (on-demand playbook).
+
+**The test:** is this fact about *one semantic object*, *one agent*, or *the organization more broadly*? Only the third belongs in a context item. The first two are already loaded into AI context via the semantic-object or agent definition — putting them in a context item duplicates and risks drift.
+
+---
+
 ## Before creating: extend or create?
 
 Default to **extending an existing item** rather than creating a sibling, whenever the new fact describes the same domain concept as an existing item.
+
+> The most important "extend, don't create" target is often *not* a sibling context item — it's the field/entity description or the agent body (see "where does this context belong?" above). Check those first. The check below applies once you've confirmed the fact is genuinely cross-cutting and belongs in a context item at all.
 
 **The check, before drafting anything:**
 
@@ -300,12 +323,13 @@ Search for topics like: "context items", "instructions", "agent context", "memor
 
 ---
 
-## MANDATORY: Confirm You Are Not Duplicating Semantic Layer Logic
+## MANDATORY: Confirm This Belongs in a Context Item
 
 Before creating any context item, verify:
 
 1. **Does this describe a calculation or data definition?** → Build it as a metric, attribute, or filter instead.
-2. **Does this duplicate something already in the semantic layer?** → Update the semantic object's `description` field instead of adding context.
-3. **Is this a preference that references an existing metric by name?** → Good candidate for an instruction.
+2. **Is this a fact about one field or entity** (its meaning, allowed values, synonyms)? → Update that field's or entity's `description` / AI metadata — already loaded into every relevant session, no glob needed.
+3. **Is this a fact about what an agent covers or how it speaks** (scope, user-perspective phrasing, agent-wide rules)? → Update the agent's `description` + markdown body — already loaded into every session of that agent.
+4. **Is this a cross-cutting preference, playbook, external pointer, or historical event** that references existing semantic objects by name? → Good candidate for a context item.
 
-If you are unsure, ask the user: *"Should I add this as a rule for the AI analyst, or should I encode it directly in the semantic layer as a metric/attribute?"*
+If you are unsure, ask the user: *"Should this live on the field/entity, on the agent, or as a separate context item?"*
