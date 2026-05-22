@@ -58,6 +58,46 @@ If the information describes *how to compute something*, *what a value means mat
 
 ---
 
+## Before creating: where does this context belong?
+
+Context items are only one of three places organizational context reaches the AI analyst. Before drafting an item, check whether the fact belongs in one of the other two — both are already part of every relevant session automatically, with no glob configuration.
+
+| Where the context lives | When the AI sees it | Use for |
+|---|---|---|
+| **Field / entity `description` (AI metadata)** | Whenever that field or entity is in scope | The meaning of a field, its allowed values, synonyms for an entity — facts that travel with a single semantic object |
+| **Agent `description` + markdown body** | Every session of that agent | What the agent covers, user-perspective phrasing, agent-wide scope or tone |
+| **Context item** | Instructions: every prompt. Skills / knowledge / memory: only when retrieval matches. | Cross-cutting rules, on-demand playbooks, external pointers, historical events |
+
+**Routing examples:**
+- *"The `orders.status` codes mean: 'A' = active, 'L' = legacy (pre-2022 migration, treat as active), 'X' = test record."* → field `description` (non-SQL facts about allowed values). If the rule were "active means status in ('A','L')", that's logic → make it a calculated attribute, not a description.
+- *"Users call refunds 'returns' — recognize both terms."* → entity AI-metadata `synonyms`, not an instruction.
+- *"This agent only handles finance; revenue / margin / cogs questions route here."* → agent description + body, not a `**`-globbed instruction.
+- *"For every revenue question, prefer `orders.net_revenue` over `orders.gross_revenue`."* → instruction (cross-cutting, references existing semantic objects).
+- *"To investigate churn, segment by cohort then compare retention curves."* → skill (on-demand playbook).
+
+**The test:** is this fact about *one semantic object*, *one agent*, or *the organization more broadly*? Only the third belongs in a context item. The first two are already loaded into AI context via the semantic-object or agent definition — putting them in a context item duplicates and risks drift.
+
+---
+
+## Before creating: extend or create?
+
+Default to **extending an existing item** rather than creating a sibling, whenever the new fact describes the same domain concept as an existing item.
+
+> The most important "extend, don't create" target is often *not* a sibling context item — it's the field/entity description or the agent body (see "where does this context belong?" above). Check those first. The check below applies once you've confirmed the fact is genuinely cross-cutting and belongs in a context item at all.
+
+**The check, before drafting anything:**
+
+1. Run `list_context_items` and scan items whose folder or name touches the new fact's domain.
+2. For each candidate, ask: *does this item describe the same domain concept?* — e.g. the data window, a metric's definition, a policy area, a deletion rule. Different sub-aspects of one concept (start vs end of a window; multiple reasons to exclude rows on the same field; sequential refinements of the same metric) are **one concept**.
+3. If a candidate exists → call `get_context_item`, then `update_context_item` extending it. Broaden the `title` and `description` to reflect the new scope; keep the existing `name` to avoid breaking agent globs that reference it.
+4. Only create a new item when no existing item covers the concept — or when the new fact is genuinely orthogonal (a *different* policy on the same entity, not a refinement of an existing one).
+
+**Smell test for "this should have been an update":** two items in the same folder whose descriptions could be merged into a single coherent paragraph without losing information. Memory events especially are prone to this — a "launch" event and a "sunset" event for the same dataset are bookends of one window, not two independent facts. One memory event with both `from_date` and `to_date` is correct; two events split by sub-aspect is the smell.
+
+Why this matters: each on-demand item is an independent retrieval candidate. Splitting one fact into N items means the model has to retrieve all N to reconstruct the concept, and any one being missed produces a partial-truth answer. One coherent item retrieves once and answers fully.
+
+---
+
 ## MCP Tools
 
 ### create_context_item
@@ -137,6 +177,7 @@ This way, an agent configured with `finance/*` automatically gets all finance co
 - Use the folder to reflect ownership, not to repeat the item type. `finance/use-net-revenue` is good. `instructions/use-net-revenue` is redundant.
 - Name after the concept or rule, not the implementation. `exclude-canceled-orders` is better than `filter-status-not-canceled`.
 - For memory events, name after the event itself, not a generic label. `revenue-redefinition` or `gdpr-rollout` beats `data-change-3`.
+- **For facts that may evolve, prefer concept-scoped names over event-scoped names.** A memory item named `data/launch-may-2023` locks the scope to the launch event; when the dataset later acquires a cutoff date, the narrow name tempts you into a sibling item rather than extending. `data/data-window` or `data/data-coverage` stays accurate as the facts grow. Same principle for instructions: `bookings/revenue-definition` survives a redefinition; an implementation-pinned name like `bookings/use-confirmed-revenue-v2` does not.
 
 ---
 
@@ -227,7 +268,7 @@ Memory items are retrieved on demand when the model judges them relevant to the 
 - `description`: **required** — what this event is about (used for retrieval)
 - prose body: **what happened and why it matters** for data interpretation
 - `from_date`: when the event occurred (point-in-time) or when it started (if a duration)
-- `to_date`: *(optional)* end date for events spanning a period
+- `to_date`: *(optional)* end date for events spanning a period. **Use the `from_date` / `to_date` bookend pattern for windows** — a dataset's data-coverage window, a feature's availability period, an experiment's run dates. Set both bounds on a single item; do not split a window into two "start" and "end" events.
 - `related_objects`: *(optional)* only the fields or entities directly changed or affected by this event — not downstream consumers, not lineage, not entities that happen to join to a relevant one; use an entity reference instead of a field list when the event affects most fields of that entity
 - `labels`: optional tags for grouping
 - `owner`: *(optional)* defaults to the caller
@@ -276,18 +317,19 @@ Search for topics like: "context items", "instructions", "agent context", "memor
 
 4. **Folder by domain, not by type.** `finance/` should contain instructions, skills, knowledge, and events all related to finance. This makes agent glob patterns meaningful.
 
-5. **Check for duplicates before creating.** Run `list_context_items` first. Overlapping or contradictory instructions are worse than none.
+5. **Check for adjacent items, not just duplicates, before creating.** Run `list_context_items` first. Overlapping or contradictory instructions are worse than none — but adjacency matters as much as overlap. If an existing item describes the same domain concept (the data window, a metric's definition, a policy area), extend it rather than create a sibling. See "Before creating: extend or create?" above.
 
 6. **Use labels for cross-cutting concerns.** Labels like `pii`, `finance`, or `deprecated` enable filtering that cuts across folder hierarchy.
 
 ---
 
-## MANDATORY: Confirm You Are Not Duplicating Semantic Layer Logic
+## MANDATORY: Confirm This Belongs in a Context Item
 
 Before creating any context item, verify:
 
 1. **Does this describe a calculation or data definition?** → Build it as a metric, attribute, or filter instead.
-2. **Does this duplicate something already in the semantic layer?** → Update the semantic object's `description` field instead of adding context.
-3. **Is this a preference that references an existing metric by name?** → Good candidate for an instruction.
+2. **Is this a fact about one field or entity** (its meaning, allowed values, synonyms)? → Update that field's or entity's `description` / AI metadata — already loaded into every relevant session, no glob needed.
+3. **Is this a fact about what an agent covers or how it speaks** (scope, user-perspective phrasing, agent-wide rules)? → Update the agent's `description` + markdown body — already loaded into every session of that agent.
+4. **Is this a cross-cutting preference, playbook, external pointer, or historical event** that references existing semantic objects by name? → Good candidate for a context item.
 
-If you are unsure, ask the user: *"Should I add this as a rule for the AI analyst, or should I encode it directly in the semantic layer as a metric/attribute?"*
+If you are unsure, ask the user: *"Should this live on the field/entity, on the agent, or as a separate context item?"*
