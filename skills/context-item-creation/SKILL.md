@@ -323,7 +323,7 @@ Search for topics like: "context items", "instructions", "agent context", "memor
 
 ---
 
-## MANDATORY: Confirm This Belongs in a Context Item
+## MANDATORY: Before Creating — Confirm This Belongs in a Context Item
 
 Before creating any context item, verify:
 
@@ -333,3 +333,24 @@ Before creating any context item, verify:
 4. **Is this a cross-cutting preference, playbook, external pointer, or historical event** that references existing semantic objects by name? → Good candidate for a context item.
 
 If you are unsure, ask the user: *"Should this live on the field/entity, on the agent, or as a separate context item?"*
+
+---
+
+## MANDATORY: Validate After Creating
+
+**After `create_context_item` or `update_context_item`, you MUST run a deep analysis that exercises the new item.** A successful create call only confirms the item was stored — it does NOT confirm the AI analyst actually picks it up at query time. Only a real session does that, and a context item that isn't exercised is a context item the user can't trust.
+
+Use `initiate_analysis` (see the `query` skill) against an agent whose context glob includes the new item:
+
+1. **Pick the target agent** via `list_agents` / `get_agent`. If no existing agent's context glob includes the new item, tell the user — the item won't reach the AI until an agent references it.
+2. **Pose a question that should be shaped by the item:**
+   - **Instruction** — a question the rule applies to (e.g. any revenue question, for a `use-net-revenue` instruction).
+   - **Skill / Knowledge** — a question matching the `description` retrieval signal.
+   - **Memory event** — a question whose answer crosses the event's date range.
+3. **Read the analysis output and confirm the item was picked up:**
+   - **Instruction** — the analysis followed the rule (used the preferred metric, applied the exclusion, etc.).
+   - **Skill / Knowledge** — the analysis retrieved and used the item, or its steps follow the playbook.
+   - **Memory event** — the analysis acknowledged the event in its interpretation or caveats.
+4. **If the item was not picked up, iterate the item, not the question.** Likely causes: weak `description` (for on-demand items), glob mismatch on the agent, too-vague rule (for instructions), or duplication with an existing item that the model picked instead.
+
+Display the `ui_url` from `initiate_analysis` so the user can follow along in the Honeydew application.
