@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.1.1] - 2026-05-24
+
+### Changed
+
+- **`context-item-creation` skill: require deep-analysis test after creating** — a successful `create_context_item` only confirms storage, not that the AI analyst actually picks up the item at query time. The skill now mandates running a deep analysis (via `initiate_analysis` from the `query` skill) against an agent whose context glob includes the new item, with per-type guidance on which question to ask and how to verify the item was picked up.
+
 ## [1.1.0] - 2026-05-15
 
 ### Added
