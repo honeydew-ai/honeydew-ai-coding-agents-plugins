@@ -25,9 +25,10 @@ plugins/honeydew-ai/             # Codex marketplace wrapper path (symlinks to r
 .github/plugin/                  # GitHub Copilot config (plugin.json, marketplace.json)
 .codex-plugin/                   # Codex plugin config (plugin.json)
 .mcp.json                        # Root-level MCP config (honeydew + honeydew-docs servers)
+gemini-extension.json            # Gemini CLI extension manifest (mcpServers + skills)
 ```
 
-The repo root IS the single `honeydew-ai` plugin. Codex marketplace entries must point to a non-empty plugin path, so `plugins/honeydew-ai/` is a wrapper made of relative symlinks back to the canonical root plugin files. `.cursor/skills/` and `.gemini/skills/` contain symlinks to `skills/<name>`.
+The repo root IS the single `honeydew-ai` plugin, and also the Gemini CLI extension. Codex marketplace entries must point to a non-empty plugin path, so `plugins/honeydew-ai/` is a wrapper made of relative symlinks back to the canonical root plugin files. `.cursor/skills/` contains symlinks to `skills/<name>`. Gemini CLI loads the extension straight from the repo root: it reads `gemini-extension.json` for the MCP servers and auto-discovers skills under `skills/`. Like the Claude plugin, the extension ships skills and MCP servers only — no context file. There is intentionally no `GEMINI.md`; if present at the root, Gemini would auto-load it as extension context.
 
 ## Version Bump Checklist
 
@@ -54,22 +55,23 @@ When adding a new skill, update **all** of these:
 
 1. `skills/<skill-name>/SKILL.md` — create the skill with YAML frontmatter (`name`, `description`)
 2. `.cursor/skills/`: `ln -s ../../skills/<skill-name>/ .cursor/skills/<skill-name>`
-3. `.gemini/skills/`: `ln -s ../../skills/<skill-name> .gemini/skills/<skill-name>`
-4. `.claude-plugin/plugin.json` — add skill entry
-5. `.cursor-plugin/plugin.json` — add skill entry
-6. `.github/plugin/plugin.json` — add skill to `skills` array
-7. `.codex-plugin/plugin.json` — add skill entry
-8. `README.md` — add row to the Available Skills table and update the skill count
-9. `AGENTS.md` — update repo structure listing and skill count
-10. Bump the version (see Version Bump Checklist)
+3. `.claude-plugin/plugin.json` — add skill entry
+4. `.cursor-plugin/plugin.json` — add skill entry
+5. `.github/plugin/plugin.json` — add skill to `skills` array
+6. `.codex-plugin/plugin.json` — add skill entry
+7. `README.md` — add row to the Available Skills table and update the skill count
+8. `AGENTS.md` — update repo structure listing and skill count
+9. Bump the version (see Version Bump Checklist)
+
+Gemini CLI needs no per-skill step — it auto-discovers every `skills/<skill-name>/SKILL.md` under the extension root.
 
 ## Skill Conventions
 
 - Each skill lives in `skills/<skill-name>/`
-- `.cursor/skills/` and `.gemini/skills/` contain relative symlinks to every skill directory.
-  When adding, renaming, or deleting a skill, update the symlinks in both:
+- `.cursor/skills/` contains relative symlinks to every skill directory.
+  When adding, renaming, or deleting a skill, update the symlinks:
   - `.cursor/skills/`: `ln -s ../../skills/<skill-name>/ .cursor/skills/<skill-name>`
-  - `.gemini/skills/`: `ln -s ../../skills/<skill-name> .gemini/skills/<skill-name>`
+  Gemini CLI needs no symlinks — its extension auto-discovers skills under the root `skills/` directory.
 - `SKILL.md` (uppercase) is required — has YAML frontmatter with `name` and `description`
 - Optional companion files: `examples.md`, `reference.md` (lowercase)
 - Field references always use `entity.field_name` (fully qualified)
