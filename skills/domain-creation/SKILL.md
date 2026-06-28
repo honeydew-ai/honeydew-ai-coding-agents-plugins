@@ -65,7 +65,11 @@ After a successful `create_object` or `update_object` call, the response include
 Need to create a domain?
     │
     ├─► Does an existing domain already define most of what you need?
-    │       ├─► Yes → extend it with `extends:` and override only the differences (see Domain Hierarchy)
+    │       ├─► Yes, and you WANT to track it → extend it with `extends:` and override only
+    │       │        the differences (see Domain Hierarchy). Note: extending creates a live
+    │       │        dependency — future changes to the parent are automatically inherited by
+    │       │        your domain. Extend when that shared evolution is desirable; define a
+    │       │        standalone domain if you need to be insulated from the parent's changes.
     │       └─► No  → define a standalone domain (and consider whether it should become a reusable base)
     │
     ├─► Which entities should be included?
@@ -120,6 +124,8 @@ List several parents under `extends`. Parents are evaluated **left-to-right**: i
 - A shared **base domain** defines the common entities and governance; team/region/use-case domains extend it and narrow scope or add filters.
 - An **executive or restricted** view extends a base and strips PII via `fields: ["-*", ...]` or `merge: remove`.
 - Combine with domain-level warehouse roles for regional or team-specific row-level security that inherits a shared base.
+
+**Trade-off:** extending a domain creates a live dependency on the parent's implementation — any future change to the parent (entities, fields, filters, parameters) is automatically inherited by every domain that extends it. This is exactly what you want when domains should evolve together from a single source of truth, but it means a parent edit can change child behavior unexpectedly. If a domain must stay stable regardless of how others change, define it standalone instead of extending.
 
 See [reference.md](reference.md) for the full inheritance rules and [examples.md](examples.md) for worked hierarchy examples.
 
