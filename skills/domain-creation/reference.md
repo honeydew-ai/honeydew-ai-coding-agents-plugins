@@ -148,8 +148,6 @@ See the `filtering` skill for the full filter expression reference, including co
 
 ## Domain Hierarchy (Inheritance)
 
-> **Beta:** Domain hierarchy is a Beta feature and may require activation for the account (contact Honeydew support).
-
 A domain extends one or more parents with the `extends` field. The child inherits the parents' configuration and overrides only what it redefines.
 
 ```yaml

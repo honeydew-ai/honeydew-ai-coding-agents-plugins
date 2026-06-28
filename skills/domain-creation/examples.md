@@ -158,8 +158,6 @@ parameters:
 
 ## Domain hierarchy — base + extending child
 
-> Domain hierarchy is a Beta feature; confirm it's activated for the account.
-
 Define a reusable base domain, then extend it for a region-specific view. The child inherits all entities, filters, and metadata, and overrides only the differences.
 
 Base domain — call `create_object` with yaml_text:

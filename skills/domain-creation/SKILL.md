@@ -86,8 +86,6 @@ Need to create a domain?
 
 ## Domain Hierarchy
 
-> **Beta:** Domain hierarchy is currently a Beta feature and may need to be activated for the account (contact Honeydew support). Confirm it's available before relying on it.
-
 A domain can **extend one or more parent domains** using the `extends` field, inheriting their configuration and overriding only what differs. This is the recommended way to avoid duplicating entity selections, filters, and governance settings across related domains.
 
 ```yaml
