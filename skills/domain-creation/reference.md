@@ -10,6 +10,8 @@ description: |-
   <business description — include purpose and intended audience>
 owner: <owner_email_or_team>
 labels: []
+extends:                      # optional — inherit from one or more parent domains
+  - <parent_domain_name>
 entities:
   - name: <entity_name>
     fields:                   # optional — omit to include all fields
@@ -143,3 +145,101 @@ source_filters:
 Both filter types use the same expression syntax in the `sql` field. All field references must be fully qualified (`entity.field`).
 
 See the `filtering` skill for the full filter expression reference, including comparisons, IN lists, pattern matching, date filters, NULL checks, and combining conditions.
+
+## Domain Hierarchy (Inheritance)
+
+> **Beta:** Domain hierarchy is a Beta feature and may require activation for the account (contact Honeydew support).
+
+A domain extends one or more parents with the `extends` field. The child inherits the parents' configuration and overrides only what it redefines.
+
+```yaml
+type: domain
+name: child_domain
+extends:
+  - parent_domain
+```
+
+### What gets inherited
+
+From each parent, a child inherits:
+
+- All **entities** and their field selections
+- All **filters** (semantic) and **source_filters**
+- All **parameters**
+- All **tags**
+- All **labels** (additive)
+- All **metadata** sections
+
+### Merge rules
+
+List items are matched by `name` (tags by `key`; metadata sections by `name`, then items within by `key`). When the child defines an item that already exists in a parent:
+
+| Item kind | Behavior when child redefines it |
+|-----------|----------------------------------|
+| Scalar fields (e.g. filter `sql`) | **Replaced** by the child's value |
+| Collection fields (e.g. entity `fields`) | **Extended** — child selectors apply on top of the inherited list |
+| `labels` | **Additive** — child labels appended to parent labels |
+| `tags` (by `key`) | Same key **replaces**; new keys are **added** |
+| `metadata` items (by `key`) | Same key **overrides**; new keys are **added** |
+
+### Field inheritance
+
+Child field selectors apply on top of the inherited field list:
+
+```yaml
+# Parent
+entities:
+  - name: customers
+    fields: ["*"]
+  - name: orders
+    fields: [order_id, order_date, order_status]
+
+# Child
+entities:
+  - name: customers
+    fields: ["-ssn", "-salary"]   # remove from inherited (all-except)
+  - name: orders
+    fields: [order_total]         # add to inherited
+
+# Result:
+#   customers: all fields except ssn, salary
+#   orders:    [order_id, order_date, order_status, order_total]
+```
+
+If the parent uses `fields: ["*"]`, the child already inherits all fields. To restrict to a specific subset, reset with `-*` first, then list the fields to keep:
+
+```yaml
+entities:
+  - name: customers
+    fields: ["-*", id, name, email]   # only these three
+```
+
+### Removing inherited items
+
+Use `merge: remove` to drop an item inherited from a parent. Works for `entities`, `filters`, `source_filters`, `parameters`, and `tags`:
+
+```yaml
+entities:
+  - name: sensitive_entity
+    merge: remove
+filters:
+  - name: legacy_filter
+    merge: remove
+parameters:
+  - name: OLD_PARAM
+    merge: remove
+tags:
+  - key: deprecated_tag
+    merge: remove
+```
+
+### Multiple inheritance
+
+List several parents under `extends`. **Parents are evaluated left-to-right: if multiple parents define the same item, the rightmost parent wins.** The child then overrides all parents. This supports a mixin pattern — compose a base data model with separate security and performance mixins:
+
+```yaml
+extends:
+  - base_sales          # data model
+  - security_mixin      # governance filters
+  - performance_mixin   # source filters
+```

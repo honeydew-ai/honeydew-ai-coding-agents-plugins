@@ -156,6 +156,129 @@ parameters:
     value: "default"
 ```
 
+## Domain hierarchy — base + extending child
+
+> Domain hierarchy is a Beta feature; confirm it's activated for the account.
+
+Define a reusable base domain, then extend it for a region-specific view. The child inherits all entities, filters, and metadata, and overrides only the differences.
+
+Base domain — call `create_object` with yaml_text:
+
+```yaml
+type: domain
+name: base_sales
+display_name: Base Sales
+description: |-
+  Shared sales data model and governance. Other sales domains extend this.
+owner: data-team
+entities:
+  - name: customers
+    fields: ["*"]
+  - name: orders
+    fields: ["*"]
+  - name: products
+    fields: ["*"]
+filters:
+  - name: exclude_test
+    sql: orders.is_test = false
+```
+
+Child domain (extends the base) — call `create_object` with yaml_text:
+
+```yaml
+type: domain
+name: sales_us
+display_name: US Sales
+description: |-
+  US-region sales view. Inherits base_sales, hides customer SSN,
+  and restricts to US customers.
+owner: sales-team
+extends:
+  - base_sales
+entities:
+  - name: customers
+    fields: ["-ssn"]          # extend inherited field list: drop SSN
+filters:
+  - name: us_region           # new filter (exclude_test is inherited)
+    sql: customers.country = 'US'
+source_filters:
+  - name: recent_data
+    sql: orders.order_date >= '2024-01-01'
+```
+
+`sales_us` resolves to: all three entities (customers without `ssn`), both `exclude_test` (inherited) and `us_region` (added) filters, plus the source filter.
+
+## Domain hierarchy — multiple inheritance (mixins)
+
+Compose a base data model with separate security and performance mixins. Parents are evaluated left-to-right; the rightmost wins on conflicts, and the child overrides all parents.
+
+Mixins and composed domain — call `create_object` once per domain:
+
+```yaml
+# Security mixin
+type: domain
+name: security_mixin
+description: Governance filter shared across secure domains.
+owner: data-gov
+filters:
+  - name: exclude_test
+    sql: orders.is_test = false
+```
+
+```yaml
+# Performance mixin
+type: domain
+name: performance_mixin
+description: Partition-pruning source filter shared across domains.
+owner: data-platform
+source_filters:
+  - name: partition_recent
+    sql: orders.order_date >= '2024-01-01'
+```
+
+```yaml
+# Composed domain
+type: domain
+name: sales_secure
+display_name: Secure Sales
+description: |-
+  Base sales model composed with security and performance mixins.
+  Strips customer PII to ID only.
+owner: sales-team
+extends:
+  - base_sales
+  - security_mixin
+  - performance_mixin
+entities:
+  - name: customers
+    fields: ["-*", customer_id]   # restrict to ID only (no PII)
+filters:
+  - name: public_only             # child-specific filter
+    sql: customers.visibility = 'PUBLIC'
+```
+
+## Domain hierarchy — removing an inherited item
+
+Use `merge: remove` to drop something an extended parent contributes. Call `create_object` with yaml_text:
+
+```yaml
+type: domain
+name: sales_no_products
+display_name: Sales (No Products)
+description: |-
+  Extends base_sales but excludes the products entity and the
+  inherited test filter.
+owner: sales-team
+extends:
+  - base_sales
+entities:
+  - name: products
+    merge: remove
+filters:
+  - name: exclude_test
+    merge: remove
+```
+
 ## Update existing domain
 
 1. Use `search_model` to find the domain's `object_key`.

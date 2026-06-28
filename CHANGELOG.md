@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.1.1] - 2026-06-28
+
+### Changed
+
+- **`domain-creation` skill: document domain hierarchy** — added coverage of `extends` (extending one or more parent domains), what gets inherited (entities, filters, parameters, tags, labels, metadata), merge rules (scalar replace vs. collection extend, additive labels), `merge: remove` for dropping inherited items, and multiple inheritance with left-to-right precedence. Updated SKILL.md, reference.md, and examples.md.
+
 ## [1.1.0] - 2026-05-15
 
 ### Added

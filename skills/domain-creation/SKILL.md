@@ -1,6 +1,6 @@
 ---
 name: domain-creation
-description: Guides you through creating a Honeydew domain — a governance object that scopes entity/field visibility and applies mandatory filters — ideal for setting up contexts for deep analysis.
+description: Guides you through creating a Honeydew domain — a governance object that scopes entity/field visibility and applies mandatory filters — ideal for setting up contexts for deep analysis. Also covers domain hierarchy — extending parent domains, inheritance and merge rules, multiple inheritance, and removing inherited items.
 ---
 
 ## Prerequisites
@@ -20,6 +20,8 @@ Domains control:
 - **Source filters** (`source_filters`) — applied early at the source level, for performance optimization
 
 Domains are the primary mechanism for creating focused, governed views of the model for specific teams, use cases, or analysis contexts.
+
+Domains can also **extend one or more parent domains** (`extends`), inheriting and building on their configuration. This lets you compose reusable base domains into specialized, team- or use-case-specific views. See [Domain Hierarchy](#domain-hierarchy) below.
 
 > This skill focuses on domain creation and management.
 > Use `entity-creation` to create entities and `attribute-creation` / `metric-creation` to add fields before scoping them into a domain.
@@ -62,6 +64,10 @@ After a successful `create_object` or `update_object` call, the response include
 ```text
 Need to create a domain?
     │
+    ├─► Does an existing domain already define most of what you need?
+    │       ├─► Yes → extend it with `extends:` and override only the differences (see Domain Hierarchy)
+    │       └─► No  → define a standalone domain (and consider whether it should become a reusable base)
+    │
     ├─► Which entities should be included?
     │       └─► Use list_entities / search_model (OR mode) to discover available entities
     │
@@ -78,9 +84,52 @@ Need to create a domain?
 
 ---
 
+## Domain Hierarchy
+
+> **Beta:** Domain hierarchy is currently a Beta feature and may need to be activated for the account (contact Honeydew support). Confirm it's available before relying on it.
+
+A domain can **extend one or more parent domains** using the `extends` field, inheriting their configuration and overriding only what differs. This is the recommended way to avoid duplicating entity selections, filters, and governance settings across related domains.
+
+```yaml
+type: domain
+name: sales_us
+extends:
+  - base_sales        # inherit everything from base_sales
+filters:
+  - name: us_region   # add a child-specific filter
+    sql: customers.country = 'US'
+```
+
+### What gets inherited
+
+A child inherits from each parent: **entities** (and their field selections), **semantic and source filters**, **parameters**, **tags**, **labels** (additive), and all **metadata** sections.
+
+### How items merge
+
+List items are matched by `name` (tags by `key`, metadata sections by `name`):
+
+- **Scalar fields** (e.g. a filter's `sql`) defined in the child **replace** the parent's value.
+- **Collection fields** (e.g. an entity's `fields`) defined in the child **extend** the inherited list — child field selectors apply on top of the inherited field list.
+- **Labels are additive** — child labels are appended to parent labels.
+- To drop something inherited, add the item with `merge: remove` (works for entities, filters, source_filters, parameters, and tags).
+
+### Multiple inheritance
+
+List several parents under `extends`. Parents are evaluated **left-to-right**: if more than one parent defines the same item, the **rightmost parent wins**, and the child overrides all parents. This enables a mixin pattern — e.g. a base data model plus separate security and performance mixins composed into one domain.
+
+### When to use a hierarchy
+
+- A shared **base domain** defines the common entities and governance; team/region/use-case domains extend it and narrow scope or add filters.
+- An **executive or restricted** view extends a base and strips PII via `fields: ["-*", ...]` or `merge: remove`.
+- Combine with domain-level warehouse roles for regional or team-specific row-level security that inherits a shared base.
+
+See [reference.md](reference.md) for the full inheritance rules and [examples.md](examples.md) for worked hierarchy examples.
+
+---
+
 ## Examples
 
-See [examples.md](examples.md) for full worked examples covering: basic entity selection, semantic filters, source filters, field selectors, deep analysis context and update/delete.
+See [examples.md](examples.md) for full worked examples covering: basic entity selection, semantic filters, source filters, field selectors, deep analysis context, domain hierarchy (extends / multiple inheritance), and update/delete.
 
 ---
 
@@ -110,8 +159,9 @@ Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
 - You need guidance on advanced modeling configurations like parameter overrides or complex field selectors
 - The user asks about how domains interact with BI tools, queries, or the deep analysis API
 - The user needs advanced modeling patterns for governance or multi-tenant access control
+- The user asks about domain hierarchy / inheritance (`extends`), merge precedence, or composing base domains and mixins
 
-Search for topics like: "domains", "governance", "filters", "field selectors", "access control", "source filters".
+Search for topics like: "domains", "domain hierarchy", "governance", "filters", "field selectors", "access control", "source filters". The `recipes/domain-hierarchy` page has a full worked five-domain hierarchy example.
 
 ---
 
@@ -125,6 +175,8 @@ Search for topics like: "domains", "governance", "filters", "field selectors", "
 - **Use `description`** to document the domain's purpose and intended audience clearly.
 - **Keep domains focused.** A domain for "Sales Team" should only include entities and fields relevant to sales analysis.
 - **Use field selectors sparingly.** Only restrict fields when there's a clear governance need (e.g. hiding PII from certain teams).
+- **Factor shared configuration into a base domain.** When several domains share entities, filters, or governance settings, define a reusable base domain and `extends` it rather than copying YAML. Override only the differences in the child.
+- **Keep base domains generic and mixins single-purpose.** A base holds the common data model; security and performance concerns make good standalone mixins composed via multiple inheritance.
 - **All filter `sql` references must be fully qualified.** Always use `entity.field` notation — unqualified references fail validation.
 
 ---
