@@ -121,9 +121,9 @@ List several parents under `extends`. Parents are evaluated **left-to-right**: i
 
 ### When to use a hierarchy
 
-- A shared **base domain** defines the common entities and governance; team/region/use-case domains extend it and narrow scope or add filters.
-- An **executive or restricted** view extends a base and strips PII via `fields: ["-*", ...]` or `merge: remove`.
-- Combine with domain-level warehouse roles for regional or team-specific row-level security that inherits a shared base.
+- When multiple domains share entities, fields, filters, or governance settings, factor the common configuration into a **base domain** and have the others extend it, rather than duplicating it.
+- When a domain is a **narrowed or restricted variant** of another — adding filters, hiding fields, or removing entities — extend the broader one and override only the differences.
+- When you want related domains to **stay in sync from a single source of truth**, so a change made once in the base propagates to everything that extends it.
 
 **Trade-off:** extending a domain creates a live dependency on the parent's implementation — any future change to the parent (entities, fields, filters, parameters) is automatically inherited by every domain that extends it. This is exactly what you want when domains should evolve together from a single source of truth, but it means a parent edit can change child behavior unexpectedly. If a domain must stay stable regardless of how others change, define it standalone instead of extending.
 
