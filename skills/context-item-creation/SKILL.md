@@ -256,7 +256,7 @@ The AI analyst that will *consume* this skill is the same deep-analysis engine (
 
 **Example authoring prompt** (adapt the specifics to the request; take the shape, not the details):
 
-> Prepare a skill (a context item to add) that helps with revenue-impact investigation of an event. The key metric for impact is the 7-day conversion rate from `<entity_a>` and `<entity_b>`. Work through a few scenarios (e.g. impact of bounced emails, impact of disrupted campaigns) so the skill leads to a consistent way to estimate ARR across scenarios. You may inspect data to build the skill, but these are very large facts — limit yourself to one specific recent day and a small country (e.g. France) to keep the sample small. The output must not refer to specific data; it should be an applicable workflow, formatted as markdown.
+> Prepare a skill (a context item to add) that helps with revenue-impact investigation of an event. The key metric for impact is the 7-day conversion rate from `<entity_a>` and `<entity_b>`. Work through a few scenarios (e.g. impact of bounced emails, impact of disrupted campaigns) so the skill leads to a consistent way to estimate ARR across scenarios. You may inspect data to build the skill, but these are very large facts — limit yourself to one specific recent day and a specific country to keep the sample small. The output must not refer to specific data; it should be an applicable workflow, formatted as markdown.
 
 For requests that are *not* analytical playbooks (a checklist, a process the engine doesn't execute against data), skip deep analysis and author the body directly.
 
