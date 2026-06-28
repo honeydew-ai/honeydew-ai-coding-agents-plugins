@@ -236,6 +236,30 @@ See [examples.md](examples.md) for what the full frontmatter documents look like
 - Reporting preparation checklists
 - Domain-specific investigation playbooks
 
+#### Author the skill body with deep analysis
+
+> **For skills, do not hand-write the playbook body. Generate it with deep analysis first**, then wrap the result as a context item. This is the default path for any `subtype: skill` item.
+
+The AI analyst that will *consume* this skill is the same deep-analysis engine (`initiate_analysis` + `monitor_analysis`; see the **query** skill). When deep analysis writes the playbook, it expresses the steps in terms of its own internal constructs — the entities, metrics, attributes, and step-by-step analysis moves it actually executes. A playbook written that way is one the engine can follow consistently; a hand-written one tends to describe steps in language the engine cannot cleanly map to its execution, so it follows them unevenly.
+
+**Workflow:**
+
+1. **Confirm session context.** Deep analysis needs a workspace/branch (see **Prerequisites**) and an `agent` — use `list_agents` to pick one whose domain matches the skill's topic.
+2. **Prompt deep analysis to prepare the skill.** Call `initiate_analysis` with a question that asks it to *produce a reusable skill*, not to answer a one-off question. A good prompt includes:
+   - **The goal** — what investigation or task the skill should make repeatable (e.g. "estimate revenue impact of an event").
+   - **The anchor objects** — the key metrics, attributes, or entities the workflow should be built around, referenced by name so the output stays in semantic-layer terms.
+   - **A few concrete scenarios** to work through, so the engine generalizes across cases rather than solving one.
+   - **Permission to inspect data, with sampling constraints** — allow it to query real data to ground the workflow, but cap the volume (e.g. a single recent day and one small segment) so sampling stays cheap on large facts.
+   - **The output contract** — a single, self-contained markdown document that is a *generalized, applicable workflow*. It must **not** refer to specific sampled values, dates, or segments used while building it; those are scaffolding, not part of the skill.
+3. **Poll with `monitor_analysis` until `DONE`** and take the final markdown from the `responses` array.
+4. **Review and wrap.** Read the returned markdown as the skill's prose body. Strip any leftover references to the sampled data, then set the frontmatter yourself — `name`, `title`, and a rich keyword-dense `description` (the retrieval signal) — and create the item with `create_context_item`.
+
+**Example authoring prompt** (adapt the specifics to the request; take the shape, not the details):
+
+> Prepare a skill (a context item to add) that helps with revenue-impact investigation of an event. The key metric for impact is the 7-day conversion rate from `<entity_a>` and `<entity_b>`. Work through a few scenarios (e.g. impact of bounced emails, impact of disrupted campaigns) so the skill leads to a consistent way to estimate ARR across scenarios. You may inspect data to build the skill, but these are very large facts — limit yourself to one specific recent day and a small country (e.g. France) to keep the sample small. The output must not refer to specific data; it should be an applicable workflow, formatted as markdown.
+
+For requests that are *not* analytical playbooks (a checklist, a process the engine doesn't execute against data), skip deep analysis and author the body directly.
+
 ### Knowledge — external source pointer
 
 **Use when:** There is an external document (Confluence page, Notion database, runbook, policy) that the model should consult when answering relevant questions. The model fetches the content via an MCP server at retrieval time.
@@ -315,11 +339,13 @@ Search for topics like: "context items", "instructions", "agent context", "memor
 
 3. **Skill descriptions are the retrieval key.** Write rich, specific, keyword-heavy descriptions. "Guide for root cause analysis of revenue drops, covering cohort isolation, period-over-period comparison, and funnel decomposition" is far better than "revenue analysis".
 
-4. **Folder by domain, not by type.** `finance/` should contain instructions, skills, knowledge, and events all related to finance. This makes agent glob patterns meaningful.
+4. **Generate skill bodies with deep analysis.** For analytical playbooks, don't hand-write the steps — have deep analysis prepare the workflow and return a single generalized markdown document, then wrap it as the context item. The engine writes playbooks in terms of the constructs it actually executes, so it follows them more consistently. See "Author the skill body with deep analysis" above.
 
-5. **Check for adjacent items, not just duplicates, before creating.** Run `list_context_items` first. Overlapping or contradictory instructions are worse than none — but adjacency matters as much as overlap. If an existing item describes the same domain concept (the data window, a metric's definition, a policy area), extend it rather than create a sibling. See "Before creating: extend or create?" above.
+5. **Folder by domain, not by type.** `finance/` should contain instructions, skills, knowledge, and events all related to finance. This makes agent glob patterns meaningful.
 
-6. **Use labels for cross-cutting concerns.** Labels like `pii`, `finance`, or `deprecated` enable filtering that cuts across folder hierarchy.
+6. **Check for adjacent items, not just duplicates, before creating.** Run `list_context_items` first. Overlapping or contradictory instructions are worse than none — but adjacency matters as much as overlap. If an existing item describes the same domain concept (the data window, a metric's definition, a policy area), extend it rather than create a sibling. See "Before creating: extend or create?" above.
+
+7. **Use labels for cross-cutting concerns.** Labels like `pii`, `finance`, or `deprecated` enable filtering that cuts across folder hierarchy.
 
 ---
 
