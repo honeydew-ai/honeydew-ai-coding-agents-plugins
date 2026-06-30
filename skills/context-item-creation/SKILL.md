@@ -238,21 +238,20 @@ See [examples.md](examples.md) for what the full frontmatter documents look like
 
 #### Author the skill body with deep analysis
 
-> **For analytical playbooks, don't hand-write the body — have deep analysis generate it** (`initiate_analysis` + `monitor_analysis`; see the **query** skill), then wrap the result as a context item. This is the default for any `subtype: skill` item. For a non-analytical checklist the engine won't execute against data, author it directly.
+> **For analytical playbooks, generate the body with deep analysis** (`initiate_analysis` + `monitor_analysis`; see the **query** skill) and wrap the result as a context item — the default for any `subtype: skill` item. Author directly only for non-analytical checklists the engine never runs against data.
 
-The engine that will *consume* the skill is the same deep-analysis engine. When it writes the playbook, it grounds the steps in the constructs it actually executes — entities, metrics, attributes, analysis moves — so it can follow the result consistently. A hand-written playbook describes steps in language the engine can't cleanly map to its execution.
+The same engine will consume the skill, so a playbook it writes is grounded in the constructs it actually executes (entities, metrics, attributes, analysis moves) and it follows the result consistently — where it follows a hand-written one unevenly.
 
 **Workflow:**
 
-1. **Confirm session context** — deep analysis needs a workspace/branch (see **Prerequisites**) and an `agent`; use `list_agents` to pick one whose domain matches the topic.
-2. **Prompt it to *produce a reusable skill*, not to answer a one-off question.** The builder is itself an AI with full access to the schema and data, so supply only what it can't derive on its own — external knowledge and requirements:
-   - **The goal** — what task or investigation the skill should make repeatable.
-   - **Anchor objects from context** — the metrics/attributes/entities (by name) to center on, when that choice comes from business knowledge rather than discovery.
-   - **Prior investigation to ground it** — any analysis it should run first so the playbook is rooted in real data, with sampling constraints (e.g. one recent day, one segment) to keep large facts cheap.
-   - **What the skill must include** — required steps, scenarios to generalize across, or outputs the playbook should produce.
-   - **The output contract** — a single self-contained markdown document that is a *generalized, applicable workflow*; it must not reference the specific values, dates, or segments sampled while building it.
-3. **Poll `monitor_analysis` to `DONE`** and take the markdown from `responses`.
-4. **Review and wrap** — use the markdown as the prose body, strip any leftover sampled specifics, set the frontmatter (`name`, `title`, keyword-rich `description`), and call `create_context_item`.
+1. **Set session context** — a workspace/branch (see **Prerequisites**) and an `agent` (`list_agents`) whose domain matches the topic.
+2. **Prompt it to *produce a reusable skill*, not answer a one-off question.** The builder is itself an AI with full schema and data access, so supply only what it can't derive — external knowledge and requirements:
+   - **Goal** — what to make repeatable.
+   - **Anchor objects** — metrics/attributes/entities (by name) to center on, when that choice is business knowledge, not discovery.
+   - **Prior investigation** — analysis to run first so the playbook is grounded in data, with sampling caps (e.g. one recent day, one segment) to keep large facts cheap.
+   - **Required contents** — steps, scenarios to generalize across, or outputs the skill must produce.
+   - **Output** — one self-contained, generalized markdown workflow that doesn't reference the values, dates, or segments sampled while building it.
+3. **Poll to `DONE`**, take the markdown from `responses`, strip any leftover sampled specifics, add frontmatter, and `create_context_item`.
 
 ### Knowledge — external source pointer
 
@@ -333,13 +332,11 @@ Search for topics like: "context items", "instructions", "agent context", "memor
 
 3. **Skill descriptions are the retrieval key.** Write rich, specific, keyword-heavy descriptions. "Guide for root cause analysis of revenue drops, covering cohort isolation, period-over-period comparison, and funnel decomposition" is far better than "revenue analysis".
 
-4. **Generate skill bodies with deep analysis.** For analytical playbooks, don't hand-write the steps — have deep analysis prepare the workflow and return a single generalized markdown document, then wrap it as the context item. The engine writes playbooks in terms of the constructs it actually executes, so it follows them more consistently. See "Author the skill body with deep analysis" above.
+4. **Folder by domain, not by type.** `finance/` should contain instructions, skills, knowledge, and events all related to finance. This makes agent glob patterns meaningful.
 
-5. **Folder by domain, not by type.** `finance/` should contain instructions, skills, knowledge, and events all related to finance. This makes agent glob patterns meaningful.
+5. **Check for adjacent items, not just duplicates, before creating.** Run `list_context_items` first. Overlapping or contradictory instructions are worse than none — but adjacency matters as much as overlap. If an existing item describes the same domain concept (the data window, a metric's definition, a policy area), extend it rather than create a sibling. See "Before creating: extend or create?" above.
 
-6. **Check for adjacent items, not just duplicates, before creating.** Run `list_context_items` first. Overlapping or contradictory instructions are worse than none — but adjacency matters as much as overlap. If an existing item describes the same domain concept (the data window, a metric's definition, a policy area), extend it rather than create a sibling. See "Before creating: extend or create?" above.
-
-7. **Use labels for cross-cutting concerns.** Labels like `pii`, `finance`, or `deprecated` enable filtering that cuts across folder hierarchy.
+6. **Use labels for cross-cutting concerns.** Labels like `pii`, `finance`, or `deprecated` enable filtering that cuts across folder hierarchy.
 
 ---
 

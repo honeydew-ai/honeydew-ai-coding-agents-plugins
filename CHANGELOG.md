@@ -6,7 +6,7 @@ All notable changes to the Honeydew AI Plugins for Coding Agents are documented 
 
 ### Changed
 
-- **`context-item-creation` skill: generate skill bodies with deep analysis** — when creating a `subtype: skill` context item, the skill now directs you to have deep analysis (`initiate_analysis` + `monitor_analysis`) prepare the playbook and return a single generalized markdown document, then wrap that as the context item. Because the consuming engine writes playbooks in terms of the constructs it actually executes, it follows them more consistently. Added an authoring workflow covering session context, what to supply the builder (only external knowledge/requirements it can't derive — goal, anchor objects, prior investigation to ground it, required contents), sampling-constrained data inspection, the markdown output contract, and a Best Practices entry.
+- **`context-item-creation` skill: generate skill bodies with deep analysis** — for a `subtype: skill` item, the skill now directs you to have deep analysis (`initiate_analysis` + `monitor_analysis`) author the playbook and return a generalized markdown workflow, then wrap that as the context item — since the same engine consumes it and follows playbooks grounded in the constructs it executes. Adds a short authoring workflow noting that the builder, being an AI with full schema/data access, should be given only external knowledge it can't derive (goal, anchor objects, prior investigation, required contents).
 
 ## [1.1.1] - 2026-06-28
 
