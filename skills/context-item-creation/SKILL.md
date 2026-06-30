@@ -238,27 +238,21 @@ See [examples.md](examples.md) for what the full frontmatter documents look like
 
 #### Author the skill body with deep analysis
 
-> **For skills, do not hand-write the playbook body. Generate it with deep analysis first**, then wrap the result as a context item. This is the default path for any `subtype: skill` item.
+> **For analytical playbooks, don't hand-write the body — have deep analysis generate it** (`initiate_analysis` + `monitor_analysis`; see the **query** skill), then wrap the result as a context item. This is the default for any `subtype: skill` item. For a non-analytical checklist the engine won't execute against data, author it directly.
 
-The AI analyst that will *consume* this skill is the same deep-analysis engine (`initiate_analysis` + `monitor_analysis`; see the **query** skill). When deep analysis writes the playbook, it expresses the steps in terms of its own internal constructs — the entities, metrics, attributes, and step-by-step analysis moves it actually executes. A playbook written that way is one the engine can follow consistently; a hand-written one tends to describe steps in language the engine cannot cleanly map to its execution, so it follows them unevenly.
+The engine that will *consume* the skill is the same deep-analysis engine. When it writes the playbook, it grounds the steps in the constructs it actually executes — entities, metrics, attributes, analysis moves — so it can follow the result consistently. A hand-written playbook describes steps in language the engine can't cleanly map to its execution.
 
 **Workflow:**
 
-1. **Confirm session context.** Deep analysis needs a workspace/branch (see **Prerequisites**) and an `agent` — use `list_agents` to pick one whose domain matches the skill's topic.
-2. **Prompt deep analysis to prepare the skill.** Call `initiate_analysis` with a question that asks it to *produce a reusable skill*, not to answer a one-off question. A good prompt includes:
-   - **The goal** — what investigation or task the skill should make repeatable (e.g. "estimate revenue impact of an event").
-   - **The anchor objects** — the key metrics, attributes, or entities the workflow should be built around, referenced by name so the output stays in semantic-layer terms.
-   - **A few concrete scenarios** to work through, so the engine generalizes across cases rather than solving one.
-   - **Permission to inspect data, with sampling constraints** — allow it to query real data to ground the workflow, but cap the volume (e.g. a single recent day and one small segment) so sampling stays cheap on large facts.
-   - **The output contract** — a single, self-contained markdown document that is a *generalized, applicable workflow*. It must **not** refer to specific sampled values, dates, or segments used while building it; those are scaffolding, not part of the skill.
-3. **Poll with `monitor_analysis` until `DONE`** and take the final markdown from the `responses` array.
-4. **Review and wrap.** Read the returned markdown as the skill's prose body. Strip any leftover references to the sampled data, then set the frontmatter yourself — `name`, `title`, and a rich keyword-dense `description` (the retrieval signal) — and create the item with `create_context_item`.
-
-**Example authoring prompt** (adapt the specifics to the request; take the shape, not the details):
-
-> Prepare a skill (a context item to add) that helps with revenue-impact investigation of an event. The key metric for impact is the 7-day conversion rate from `<entity_a>` and `<entity_b>`. Work through a few scenarios (e.g. impact of bounced emails, impact of disrupted campaigns) so the skill leads to a consistent way to estimate ARR across scenarios. You may inspect data to build the skill, but these are very large facts — limit yourself to one specific recent day and a specific country to keep the sample small. The output must not refer to specific data; it should be an applicable workflow, formatted as markdown.
-
-For requests that are *not* analytical playbooks (a checklist, a process the engine doesn't execute against data), skip deep analysis and author the body directly.
+1. **Confirm session context** — deep analysis needs a workspace/branch (see **Prerequisites**) and an `agent`; use `list_agents` to pick one whose domain matches the topic.
+2. **Prompt it to *produce a reusable skill*, not to answer a one-off question.** The builder is itself an AI with full access to the schema and data, so supply only what it can't derive on its own — external knowledge and requirements:
+   - **The goal** — what task or investigation the skill should make repeatable.
+   - **Anchor objects from context** — the metrics/attributes/entities (by name) to center on, when that choice comes from business knowledge rather than discovery.
+   - **Prior investigation to ground it** — any analysis it should run first so the playbook is rooted in real data, with sampling constraints (e.g. one recent day, one segment) to keep large facts cheap.
+   - **What the skill must include** — required steps, scenarios to generalize across, or outputs the playbook should produce.
+   - **The output contract** — a single self-contained markdown document that is a *generalized, applicable workflow*; it must not reference the specific values, dates, or segments sampled while building it.
+3. **Poll `monitor_analysis` to `DONE`** and take the markdown from `responses`.
+4. **Review and wrap** — use the markdown as the prose body, strip any leftover sampled specifics, set the frontmatter (`name`, `title`, keyword-rich `description`), and call `create_context_item`.
 
 ### Knowledge — external source pointer
 
