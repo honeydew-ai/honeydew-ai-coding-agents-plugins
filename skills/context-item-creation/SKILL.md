@@ -245,12 +245,13 @@ The same engine will consume the skill, so a playbook it writes is grounded in t
 **Workflow:**
 
 1. **Set session context** — a workspace/branch (see **Prerequisites**) and an `agent` (`list_agents`) whose domain matches the topic.
-2. **Prompt it to *produce a reusable skill*, not answer a one-off question.** The builder is itself an AI with full schema and data access, so supply only what it can't derive — external knowledge and requirements:
+2. **Prompt by goal, not by procedure.** The builder is an AI with full schema access and its own skills for interpreting and planning analysis — over-specifying steps or particular semantic objects can suppress those skills and derail it. Give it goal-oriented instructions and only context it can't derive:
    - **Goal** — what to make repeatable.
-   - **Anchor objects** — metrics/attributes/entities (by name) to center on, when that choice is business knowledge, not discovery.
+   - **External business context** — definitions, policies, and requirements not in the schema.
    - **Prior investigation** — analysis to run first so the playbook is grounded in data, with sampling caps (e.g. one recent day, one segment) to keep large facts cheap.
-   - **Required contents** — steps, scenarios to generalize across, or outputs the skill must produce.
    - **Output** — one self-contained, generalized markdown workflow that doesn't reference the values, dates, or segments sampled while building it.
+
+   Prescribe specific steps, scenarios, or semantic objects **only when the user explicitly asked for them.**
 3. **Poll to `DONE`**, take the markdown from `responses`, strip any leftover sampled specifics, add frontmatter, and `create_context_item`.
 
 ### Knowledge — external source pointer
