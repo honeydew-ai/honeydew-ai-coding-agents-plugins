@@ -236,6 +236,24 @@ See [examples.md](examples.md) for what the full frontmatter documents look like
 - Reporting preparation checklists
 - Domain-specific investigation playbooks
 
+#### Author the skill body with deep analysis
+
+> **For analytical playbooks, generate the body with deep analysis** (`initiate_analysis` + `monitor_analysis`; see the **query** skill) and wrap the result as a context item — the default for any `subtype: skill` item. Author directly only for non-analytical checklists the engine never runs against data.
+
+The same engine will consume the skill, so a playbook it writes is grounded in the constructs it actually executes (entities, metrics, attributes, analysis moves) and it follows the result consistently — where it follows a hand-written one unevenly.
+
+**Workflow:**
+
+1. **Set session context** — a workspace/branch (see **Prerequisites**) and an `agent` (`list_agents`) whose domain matches the topic.
+2. **Prompt by goal, not by procedure.** The builder is an AI with full schema access and its own skills for interpreting and planning analysis — over-specifying steps or particular semantic objects can suppress those skills and derail it. Give it goal-oriented instructions and only context it can't derive:
+   - **Goal** — what to make repeatable.
+   - **External business context** — definitions, policies, and requirements not in the schema.
+   - **Prior investigation** — analysis to run first so the playbook is grounded in data, with sampling caps (e.g. one recent day, one segment) to keep large facts cheap.
+   - **Output** — one self-contained, generalized markdown workflow that doesn't reference the values, dates, or segments sampled while building it.
+
+   Prescribe specific steps, scenarios, or semantic objects **only when the user explicitly asked for them.**
+3. **Poll to `DONE`**, take the markdown from `responses`, strip any leftover sampled specifics, add frontmatter, and `create_context_item`.
+
 ### Knowledge — external source pointer
 
 **Use when:** There is an external document (Confluence page, Notion database, runbook, policy) that the model should consult when answering relevant questions. The model fetches the content via an MCP server at retrieval time.

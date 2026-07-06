@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.1.2] - 2026-06-28
+
+### Changed
+
+- **`context-item-creation` skill: generate skill bodies with deep analysis** — for a `subtype: skill` item, the skill now directs you to have deep analysis (`initiate_analysis` + `monitor_analysis`) author the playbook and return a generalized markdown workflow, then wrap that as the context item — since the same engine consumes it and follows playbooks grounded in the constructs it executes. Adds a short authoring workflow: because the builder is an AI with full schema access and its own analysis-planning skills, prompt it by goal with only external business context it can't derive — over-specifying steps or semantic objects can suppress its skills and derail it, so prescribe those only when the user explicitly asked.
+
 ## [1.1.1] - 2026-06-28
 
 ### Changed
