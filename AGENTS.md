@@ -24,11 +24,11 @@ plugins/honeydew-ai/             # Codex marketplace wrapper path (symlinks to r
 .cursor-plugin/                  # Cursor plugin config (plugin.json, .mcp.json, marketplace.json)
 .github/plugin/                  # GitHub Copilot config (plugin.json, marketplace.json)
 .codex-plugin/                   # Codex plugin config (plugin.json)
-.mcp.json                        # Root-level MCP config (honeydew + honeydew-docs servers)
+.mcp.json                        # Root-level MCP config (honeydew server, includes docs tools)
 gemini-extension.json            # Gemini CLI extension manifest (mcpServers + skills)
 ```
 
-The repo root IS the single `honeydew-ai` plugin, and also the Gemini CLI extension. Codex marketplace entries must point to a non-empty plugin path, so `plugins/honeydew-ai/` is a wrapper made of relative symlinks back to the canonical root plugin files. `.cursor/skills/` contains symlinks to `skills/<name>`. Gemini CLI loads the extension straight from the repo root: it reads `gemini-extension.json` for the MCP servers and auto-discovers skills under `skills/`. Like the Claude plugin, the extension ships skills and MCP servers only — no context file. There is intentionally no `GEMINI.md`; if present at the root, Gemini would auto-load it as extension context.
+The repo root IS the single `honeydew-ai` plugin, and also the Gemini CLI extension. Codex marketplace entries must point to a non-empty plugin path, so `plugins/honeydew-ai/` is a wrapper made of relative symlinks back to the canonical root plugin files. `.cursor/skills/` contains symlinks to `skills/<name>`. Gemini CLI loads the extension straight from the repo root: it reads `gemini-extension.json` for the MCP server and auto-discovers skills under `skills/`. Like the Claude plugin, the extension ships skills and the MCP server only — no context file. There is intentionally no `GEMINI.md`; if present at the root, Gemini would auto-load it as extension context.
 
 ## Version Bump Checklist
 

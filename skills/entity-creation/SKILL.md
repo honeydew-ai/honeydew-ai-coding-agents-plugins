@@ -109,7 +109,7 @@ See [reference.md](reference.md) for: YAML schemas (entity + dataset), source ty
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - You need to understand entity source types (physical table, custom SQL, virtual entity) in more depth
 - The user asks about granularity design, entity modeling patterns, or best practices

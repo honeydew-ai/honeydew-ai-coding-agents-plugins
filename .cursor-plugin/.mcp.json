@@ -1,9 +1,5 @@
 {
   "mcpServers": {
-    "honeydew-docs": {
-      "type": "http",
-      "url": "https://honeydew.ai/docs/mcp"
-    },
     "honeydew": {
       "type": "http",
       "url": "https://mcp.honeydew.cloud/mcp"
