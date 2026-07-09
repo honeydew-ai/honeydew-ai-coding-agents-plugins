@@ -82,7 +82,7 @@ Then install the plugin:
 
 ### Gemini CLI
 
-Install the Honeydew extension (skills + Honeydew MCP servers):
+Install the Honeydew extension (skills + Honeydew MCP server):
 
 ```bash
 gemini extensions install https://github.com/honeydew-ai/honeydew-ai-coding-agents-plugins

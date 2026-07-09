@@ -156,7 +156,7 @@ See [reference.md](reference.md) for: full YAML schema, entity selection syntax,
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - You need to understand governance concepts, domain design patterns, or access control strategies
 - The user asks about the difference between semantic filters and source filters, or when to use each

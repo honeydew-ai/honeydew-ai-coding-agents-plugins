@@ -315,7 +315,7 @@ See [examples.md](examples.md) for full worked examples of each type, plus right
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - You need to understand how context items interact with agents or how retrieval works
 - The user asks about agent configuration, glob patterns, or context scoping

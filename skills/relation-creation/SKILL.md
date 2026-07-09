@@ -112,7 +112,7 @@ Steps:
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - You need to understand join types, cross-filtering behavior, or relationship modeling patterns in more depth
 - The user asks about how relations affect query behavior or metric calculations

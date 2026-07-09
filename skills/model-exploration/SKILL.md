@@ -121,7 +121,7 @@ For natural language questions, trends, "why", or multi-step investigation — u
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - The user asks conceptual questions ("what is an entity?", "how do metrics work?", "what is a semantic layer?")
 - You need to explain Honeydew concepts, architecture, or terminology

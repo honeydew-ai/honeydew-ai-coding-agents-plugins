@@ -106,7 +106,7 @@ Use these MCP tools to explore existing attributes:
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - You need warehouse-specific SQL function details not covered in `reference.md` (Snowflake, Databricks, BigQuery differences)
 - The user asks about advanced attribute types (multi-entity, aggregation) or when to use each

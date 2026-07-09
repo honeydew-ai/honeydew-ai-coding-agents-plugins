@@ -2,6 +2,16 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.2.0] - 2026-07-09
+
+### Removed
+
+- **Remove the separate `honeydew-docs` MCP server** — the Honeydew MCP server now embeds documentation access via the `search_docs` and `query_docs_filesystem` tools, so the standalone documentation server is no longer bundled. Removed `honeydew-docs` from all `.mcp.json` configurations and `gemini-extension.json`.
+
+### Changed
+
+- **Update skills to use the embedded documentation tools** — all "Documentation Lookup" sections now point to `search_docs` and `query_docs_filesystem` on the `honeydew` MCP server instead of the `honeydew-docs` tools.
+
 ## [1.1.2] - 2026-06-28
 
 ### Changed

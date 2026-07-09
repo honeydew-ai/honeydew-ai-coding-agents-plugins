@@ -367,7 +367,7 @@ User: "Help me understand pricing patterns for Airbnb listings."
 
 ## Documentation Lookup
 
-Use the `honeydew-docs` MCP tools to search the Honeydew documentation when:
+Use the `search_docs` and `query_docs_filesystem` tools from the `honeydew` MCP server to search the Honeydew documentation when:
 
 - The user asks about query capabilities or features not covered in this skill
 - You need to understand how the query API interacts with domains, parameters, or governance rules
