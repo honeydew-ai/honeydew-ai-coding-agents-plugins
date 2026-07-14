@@ -20,6 +20,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 | **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
 | **Read a past conversation** | `get_stored_conversation`                      | User wants to read or review the full content of a specific past conversation.   |
+| **Review query history**  | `list_query_history`                              | User wants to inspect past query executions — what ran, from which client, the query behind a run, or to debug a failure. |
 
 ---
 
@@ -74,6 +75,9 @@ User asks a data question
     │
     ├─► User wants to read the content of a specific past conversation?
     │       └─► get_stored_conversation (conversation_id from list_analysis_chats)
+    │
+    ├─► User wants to inspect past query executions (what ran / from which client / the query behind a run / a failure)?
+    │       └─► list_query_history (filter by status/client/domain/user/time; most recent first)
     │
     ├─► Do you know the exact field names?
     │       │
@@ -343,6 +347,14 @@ Returns all messages from a past analysis conversation. Use this to read the ful
 get_stored_conversation(conversation_id="abc123")
 get_stored_conversation(conversation_id="abc123", with_step_ids=true)
 ```
+
+---
+
+## Reviewing Past Query Executions
+
+To review or inspect **queries that already ran** — what ran, from which client (BI tools, SQL interface, MCP, deep analysis), the semantic definition or compiled SQL behind a run, who ran it and when, and debugging failures — use `list_query_history` (from the `honeydew` MCP server). It lists queries previously executed through the semantic layer, most recent first, with each query's status, error message, owner, client, domain, timestamps, warehouse query ID, and a link to open it in the app.
+
+This is a distinct workflow from querying data — see the dedicated **query-debugging** skill.
 
 ---
 

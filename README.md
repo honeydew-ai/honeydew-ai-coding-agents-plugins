@@ -94,7 +94,7 @@ For coding agents that support MCP, configure the [Honeydew MCP server](https://
 
 ## Available Skills
 
-The `honeydew-ai` plugin includes 12 skills:
+The `honeydew-ai` plugin includes 13 skills:
 
 | Skill | Description |
 |-------|-------------|
@@ -108,6 +108,7 @@ The `honeydew-ai` plugin includes 12 skills:
 | **domain-creation** | Create domains — curated subsets of the semantic model exposed to specific teams or use cases |
 | **validation** | Mandatory post-creation validation — type-specific sanity checks, cross-validation, and error handling |
 | **query** | Query data using structured YAML perspectives, natural language questions, or multi-step deep analysis |
+| **query-debugging** | Review and inspect past query executions — what ran, from which client (BI tools, SQL interface, MCP, deep analysis), the semantic YAML and compiled SQL behind a run, and debugging failures |
 | **filtering** | Advanced filtering syntax — comparisons, string matching, date handling, nulls, and full-text search |
 | **conversation-review** | Bulk review past analysis conversations — categorize user feedback, build action items, and apply semantic/context layer improvements on a branch |
 

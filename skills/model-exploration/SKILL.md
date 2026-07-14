@@ -108,6 +108,10 @@ Same field parameters as `get_data_from_fields`, but returns the generated SQL w
 
 For natural language questions, trends, "why", or multi-step investigation — use the **query** skill (`initiate_analysis` + `monitor_analysis`).
 
+### Reviewing Past Query Executions
+
+To inspect queries that already ran — what ran, from which client (BI tools, SQL interface, MCP, deep analysis), the semantic YAML and compiled SQL behind a run, or to debug a failure — use `list_query_history` (see the **query-debugging** skill).
+
 ---
 
 ### Discovery Examples
