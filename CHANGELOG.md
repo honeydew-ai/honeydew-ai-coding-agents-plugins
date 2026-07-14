@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.0] - 2026-07-14
+
+### Added
+
+- **New `query-debugging` skill** — covers the `list_query_history` MCP tool for reviewing and inspecting past query executions: what ran, from which client (BI tools, SQL interface, MCP, deep analysis), who ran it and when, the semantic YAML (`include_yaml`) and compiled SQL (`include_sql`) behind a run, and the original SQL text for SQL-interface clients. Documents filtering by status/client/domain/user/time, a review flow, a failure-triage flow, and a bisection technique for isolating internal errors down to a minimal reproduction. Cross-linked from the `query`, `model-exploration`, and `validation` skills.
+
 ## [1.2.0] - 2026-07-09
 
 ### Removed
