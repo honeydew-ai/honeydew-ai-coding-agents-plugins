@@ -222,6 +222,8 @@ If a tool call fails, distinguish between:
 | Tool returns empty/NULL data   | Object was created but returns no results           | Proceed with sanity checks — likely a data or SQL issue.                                                           |
 | Tool returns unexpected values | Object works but results look wrong                 | Report findings and ask user before attempting a fix.                                                              |
 
+> To investigate a query that failed earlier — or to see how the same object behaves across other clients (BI tools, scheduled jobs) — use `list_query_history` to pull the failed execution's error, semantic YAML, and compiled SQL. See the **query-debugging** skill.
+
 ---
 
 ## Alerting Guidelines
