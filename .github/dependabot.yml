@@ -8,3 +8,7 @@ updates:
     directory: / # Check the repository's workflows under /.github/workflows/
     schedule:
       interval: daily
+    # Wait 7 days after a version is published before opening an update PR,
+    # to avoid churn from freshly-released (and possibly buggy) versions.
+    cooldown:
+      default-days: 7
