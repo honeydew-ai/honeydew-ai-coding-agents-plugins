@@ -56,15 +56,12 @@ When adding a new skill, update **all** of these:
 
 1. `skills/<skill-name>/SKILL.md` — create the skill with YAML frontmatter (`name`, `description`)
 2. `.cursor/skills/`: `ln -s ../../skills/<skill-name>/ .cursor/skills/<skill-name>`
-3. `.claude-plugin/plugin.json` — add skill entry
-4. `.cursor-plugin/plugin.json` — add skill entry
-5. `.github/plugin/plugin.json` — add skill to `skills` array
-6. `.codex-plugin/plugin.json` — add skill entry
-7. `README.md` — add row to the Available Skills table and update the skill count
-8. `AGENTS.md` — update repo structure listing and skill count
-9. Bump the version (see Version Bump Checklist)
+3. `.github/plugin/plugin.json` — add `"./skills/<skill-name>"` to the `skills` array. This is the **only** plugin config that enumerates skills one by one; miss it and GitHub Copilot does not ship the skill. Nothing enforces it in CI — the array must match `ls -d skills/*/` exactly.
+4. `README.md` — add row to the Available Skills table and update the skill count
+5. `AGENTS.md` — update repo structure listing and skill count
+6. Bump the version (see Version Bump Checklist)
 
-Gemini CLI needs no per-skill step — it auto-discovers every `skills/<skill-name>/SKILL.md` under the extension root.
+`.claude-plugin/plugin.json` and `.cursor-plugin/plugin.json` list no skills at all; `.codex-plugin/plugin.json` points at the directory (`"skills": "./skills/"`); Gemini CLI auto-discovers every `skills/<skill-name>/SKILL.md` under the extension root. None of them take a per-skill entry.
 
 ## Skill Conventions
 

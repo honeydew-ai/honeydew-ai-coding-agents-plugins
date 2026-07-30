@@ -13,6 +13,7 @@
     "./skills/filtering",
     "./skills/query",
     "./skills/attribute-creation",
+    "./skills/context-item-creation",
     "./skills/domain-creation",
     "./skills/entity-creation",
     "./skills/metric-creation",
