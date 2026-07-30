@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.4.0] - 2026-07-30
+
+### Added
+
+- **New `aggregate-awareness` skill** — building and debugging pre-aggregations. Covers choosing what to accelerate from `list_query_history`, the design decisions that determine whether a pre-aggregation can ever match a query (additive metrics, entity keys as groups, filtered domains instead of baked-in filters), creating the dynamic dataset with cache delivery settings, and reading the match report from `get_sql_from_fields` with `debug_aggregates` to find out why a query is not using one. Notes that building and refreshing the table is not an MCP operation. Cross-linked to the `query-debugging`, `domain-creation`, `workspace-branch`, and `validation` skills.
+
 ## [1.3.0] - 2026-07-14
 
 ### Added

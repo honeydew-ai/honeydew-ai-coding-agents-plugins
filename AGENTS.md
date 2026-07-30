@@ -3,10 +3,12 @@
 ## Repo Structure
 
 ```
-skills/                          # All 13 skills (single honeydew-ai plugin)
+skills/                          # All 14 skills (single honeydew-ai plugin)
   filtering/
   query/
   query-debugging/
+  aggregate-awareness/
+  aggregate-awareness/
   attribute-creation/
   context-item-creation/
   conversation-review/
