@@ -1,9 +1,17 @@
 ---
 name: model-exploration
-description: Use when exploring Honeydew semantic layer, discovering entities/fields, setting up workspace and branch context, or running simple structured queries to inspect data. For analysis questions use the query skill. For creating metrics use metric-creation skill. For creating attributes use attribute-creation skill.
+description: Use when exploring Honeydew semantic layer, discovering entities/fields, setting up workspace and branch context, or running structured queries to spot-check field values. Any question about the data itself — "why", "how", trends, root cause, anything needing multiple steps — belongs to the query skill's deep analysis, including when already mid-exploration. For creating metrics use metric-creation skill. For creating attributes use attribute-creation skill.
 ---
 
 # Instructions
+
+## Scope: The Model, Not The Data
+
+This skill discovers and verifies the **model**. It does not answer questions about the **data**.
+
+When the goal is to understand, explain, or investigate something in the data — "how does this customer use the system", "why did revenue drop", "what drives churn", or anything that becomes a report — use the **query** skill's deep analysis (`initiate_analysis` + `monitor_analysis`). Honeydew's analysis engine plans and runs the multi-step investigation itself; hand it the question rather than decomposing it into structured queries yourself. This holds even when already mid-exploration and the field names are known.
+
+`get_data_from_fields` in this skill is for spot-checks: confirm a field's values, verify a count, sample rows. Exact numbers from a spot-check are not an analysis — running a third structured query to assemble an answer is the signal to escalate to deep analysis.
 
 ## When To Use This Skill
 
@@ -88,7 +96,7 @@ Honeydew has two layers: the **semantic layer** (entities, metrics, attributes, 
 
 ### Structured Query Execution
 
-Use `get_data_from_fields` to run structured queries in the context of model exploration — e.g. spot-check field values, verify counts, check a metric's computed value, or sample rows after discovering fields.
+Use `get_data_from_fields` to run structured queries in the context of model exploration — e.g. spot-check field values, verify counts, check a metric's computed value, or sample rows after discovering fields. To answer a question about the data, use deep analysis via the **query** skill instead.
 
 Call `get_data_from_fields` with:
 
@@ -106,7 +114,7 @@ Same field parameters as `get_data_from_fields`, but returns the generated SQL w
 
 ### Analysis Questions
 
-For natural language questions, trends, "why", or multi-step investigation — use the **query** skill (`initiate_analysis` + `monitor_analysis`).
+For any question about the data — natural language questions, trends, "why", "how", root cause, or multi-step investigation — use the **query** skill (`initiate_analysis` + `monitor_analysis`). Exploration and structured queries are the wrong tool for these even when they can produce the numbers.
 
 ### Reviewing Past Query Executions
 
@@ -144,3 +152,4 @@ Search for topics like: "entities", "metrics", "attributes", "domains", "relatio
 2. Reference fields using `entity.field_name` syntax
 3. Use discovery tools before any creation tasks
 4. For creating entities, metrics, attributes, or relations - use the specialized skills listed above
+5. Escalate to the **query** skill's deep analysis as soon as the task is answering a question rather than mapping the model

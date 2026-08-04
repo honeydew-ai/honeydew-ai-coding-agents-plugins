@@ -39,6 +39,8 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 **Do NOT use when:**
 
 - The question requires multi-step reasoning or investigation
+- The goal is to understand, explain, or investigate rather than to retrieve a known figure — knowing the field names does not make a structured query the right tool
+- You would need several structured queries to assemble the answer — hand the question to deep analysis instead
 
 **How it works:**
 
@@ -79,15 +81,18 @@ User asks a data question
     ├─► User wants to inspect past query executions (what ran / from which client / the query behind a run / a failure)?
     │       └─► list_query_history (filter by status/client/domain/user/time; most recent first)
     │
-    ├─► Do you know the exact field names?
-    │       │
-    │       ├─► YES → get_data_from_fields (structured, deterministic)
-    │       │         (or get_sql_from_fields to preview SQL without executing)
-    │       │
-    │       └─► NO → initiate_analysis + monitor_analysis (plain English, any complexity)
+    ├─► Investigation / "why" / "how" / trends / root cause / anything that
+    │   takes more than one query to answer?
+    │       └─► initiate_analysis + monitor_analysis
+    │           Check this BEFORE the field-names question below — a question
+    │           whose fields you happen to know is still an investigation
     │
-    └─► Plain English question / investigation / "why" / trends?
-            └─► initiate_analysis + monitor_analysis
+    └─► Retrieving a specific figure or row set?
+            │
+            ├─► You know the exact field names → get_data_from_fields
+            │         (or get_sql_from_fields to preview SQL without executing)
+            │
+            └─► You don't → initiate_analysis + monitor_analysis
 ```
 
 ---
@@ -426,7 +431,7 @@ If your environment has visualization tools, render visualizations when they wou
 
 - **Start with discovery** — always check `list_entities` / `get_entity` before building queries, so you reference real fields
 - **Use structured queries for precision** — when you know the fields, `get_data_from_fields` gives you full control and reproducible results
-- **Use deep analysis for insight** — when the question is about "why" or requires investigating multiple dimensions
+- **Use deep analysis for insight** — anything beyond a lookup goes to `initiate_analysis`: "why", "how", trends, drivers, or any question needing more than one query. Let the analysis engine plan the investigation instead of chaining structured queries by hand
 - **Report meaningful progress, not every step** — surface a one-liner when a step produces a substantive finding; skip internal retries and error-recovery steps the user doesn't need to see
 - **Explain a prior step** — use `get_analysis_step_details` with the `step_id`; the response includes the semantic query, data results, and SQL for that step
 - **Paginate large results** — use `limit` and `offset` in `get_data_from_fields` to avoid overwhelming output
