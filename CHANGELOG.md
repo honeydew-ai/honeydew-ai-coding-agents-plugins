@@ -2,6 +2,13 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.1] - 2026-08-04
+
+### Changed
+
+- **Route investigative questions to deep analysis** — the `query` skill's decision flow asked whether the exact field names were known before asking whether the question was an investigation, so an investigative question arriving from model exploration (which is what surfaces field names) took the structured-query branch and never reached `initiate_analysis`. The investigation check now comes first, and the structured-query `Do NOT use` list covers understand/explain goals and answers that would take several queries to assemble.
+- **Scope `model-exploration` to the model, not the data** — its description offered "running simple structured queries to inspect data", which reads as self-sufficient once exploration is underway. It now describes structured queries as spot-checks and states, above the discovery steps, that any question about the data belongs to the `query` skill's deep analysis even mid-exploration with known field names.
+
 ## [1.3.0] - 2026-07-14
 
 ### Added
