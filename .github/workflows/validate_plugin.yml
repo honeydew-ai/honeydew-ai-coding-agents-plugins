@@ -10,7 +10,10 @@ on:
             - ".github/plugin/**"
             - "gemini-extension.json"
             - "skills/**"
+            - ".cursor/skills/**"
             - "hooks/**"
+            - "scripts/**"
+            - "README.md"
             - "AGENTS.md"
             - "CLAUDE.md"
             - "GEMINI.md"
@@ -32,3 +35,6 @@ jobs:
 
             - name: Validate versions in sync
               run: bash scripts/validate-versions.sh
+
+            - name: Validate skill registration in sync
+              run: bash scripts/validate-skills.sh
