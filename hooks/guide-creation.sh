@@ -30,15 +30,13 @@ case "$tool_name" in
     ;;
 esac
 
-# additionalContext arrives with the tool result, so this steers the calls that
-# follow rather than gating the one in flight -- hence "before your next", not
-# "BEFORE proceeding".
 if [ -n "$skill_hint" ]; then
-  hd_should_remind "$session_id" "$transcript" "$skill_hint" || exit 0
-  hd_emit "This session is creating or modifying Honeydew objects. If you have not already loaded the relevant skill, invoke the Skill tool with skill '$skill_hint' before your next create or update call. The skill contains critical guidance on required fields, naming conventions, and correct YAML structure. After creation, always run the 'honeydew-ai:validation' skill to verify the object works correctly."
+  hd_should_block "$session_id" "$transcript" "$skill_hint" || exit 0
+  hd_deny "Creating or modifying this Honeydew object needs the '$skill_hint' skill, which is not loaded in this session. The skill covers required fields, naming conventions and correct YAML structure, and writing the object without it risks a malformed definition. $(hd_retry_note "$skill_hint") After the object is created, run the 'honeydew-ai:validation' skill to verify it works."
 else
-  # No detected type means there is no single skill to check the transcript
-  # for, so this path is marker-gated only.
+  # No detected type means no specific skill to require. Blocking on an
+  # unrecognised payload would stop work over a guess, so this path stays
+  # advisory: name the candidates once and let the call through.
   hd_first_time "$session_id" "$transcript" "creation-generic" || exit 0
   hd_emit "This session is creating or modifying Honeydew objects. If you have not already loaded the relevant skill, invoke the appropriate Skill tool before your next create or update call. Available skills: honeydew-ai:metric-creation (metrics), honeydew-ai:attribute-creation (attributes), honeydew-ai:entity-creation (entities), honeydew-ai:relation-creation (relations), honeydew-ai:domain-creation (domains), honeydew-ai:context-item-creation (context items). After creation, always run honeydew-ai:validation."
 fi
