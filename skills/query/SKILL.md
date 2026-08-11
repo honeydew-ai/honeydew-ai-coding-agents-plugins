@@ -15,8 +15,8 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 
 | Method                    | Tool                                              | Best For                                                                         |
 | ------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | You know the exact fields. Deterministic, full control.                          |
-| **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Any natural language question — simple or complex, "why", multi-step, agentic.  |
+| **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | Retrieving a specific figure or row set. Deterministic, full control.            |
+| **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Understanding, explaining, or investigating — anything beyond a lookup.          |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 | **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
 | **Read a past conversation** | `get_stored_conversation`                      | User wants to read or review the full content of a specific past conversation.   |
@@ -53,13 +53,13 @@ Both take the same field parameters.
 
 **Use when:**
 
-- The user asks a question in plain English and you don't know the exact field names
-- The user wants a quick answer without worrying about model details
+- The goal is to understand, explain, or investigate rather than to retrieve a figure
 - The question requires multiple steps or investigative reasoning
 - The user asks "why" something happened (e.g., "why did revenue drop in Q3?")
 - The user wants trend analysis, anomaly detection, or root cause investigation
 - The question is open-ended and may require looking at the data from multiple angles
 - Follow-up questions build on prior analysis (use `conversation_id`)
+- A figure is wanted whose fields you cannot identify, and finding them would take more work than handing over the question
 
 ---
 
@@ -202,7 +202,7 @@ Filters use standard comparison expressions: `=`, `>`, `<`, `IN (...)`, `ILIKE`,
 
 ## Method 2: Deep Analysis
 
-Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, which is why it is not the tool for fetching one number. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
+Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, so a figure you could pull with a structured query over fields you already know is not worth delegating. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
 
 ### Asking the Question
 
@@ -314,7 +314,7 @@ Once a conversation exists, each next question is a choice between a follow-up a
 **Send a follow-up when:**
 
 - The next step needs reasoning rather than a different breakdown — "does the pattern hold if we control for market size?", "why is that outlier there?"
-- The next step builds on groups the conversation already computed. Structured queries cannot express intermediate computed groups — ranks, table calculations, filtering on a rank. A ranking the analysis has already built is reusable for free inside the conversation, and would have to be rebuilt by hand outside it
+- The next step builds on groups the conversation already computed. A structured query cannot express these ad hoc — ranks, table calculations, filtering on a rank exist as calculated attributes in the model, not as something a query can compute on the fly. A ranking the analysis has already built is reusable for free inside the conversation, and outside it would have to be modelled or rebuilt by hand
 - The user is following the `ui_url` and expects one coherent thread
 
 **Drop out to `get_data_from_fields` when:**
@@ -324,7 +324,7 @@ Once a conversation exists, each next question is a choice between a follow-up a
 - It is a distinct-values or count lookup
 - You want a result that is deterministic and reproducible
 
-A finished analysis is also the best source of field names for structured queries: it reports the exact `entity.field` references and filters it used, and `get_analysis_step_details` gives the semantic query and compiled SQL per step. Feed those into `get_data_from_fields` instead of rediscovering them from `list_entities`.
+A finished analysis is also the best source of field names for structured queries: it reports the exact `entity.field` references and filters it used, and `get_analysis_step_details` gives the semantic query behind any step. Feed those attributes, metrics, and filters into `get_data_from_fields` instead of rediscovering them from `list_entities`. The compiled SQL a step also returns is not an input to `get_data_from_fields` — it is for reading or handing to the warehouse.
 
 ### Interrupting and Resuming an Analysis
 
@@ -332,13 +332,13 @@ A finished analysis is also the best source of field names for structured querie
 
 **The question you send on resume is the correction.** Interrupt-and-resume is how you steer an analysis mid-flight, rather than waiting for a wrong direction to run to completion and correcting afterwards.
 
-Always abort when the user asks. On your own initiative, abort when you have evidence the direction is wrong — not a hunch:
+Always abort when the user asks. On your own initiative, the bar is a contradiction with what the user asked for — not a difference from how you would have done it:
 
-- The `interpretation` or `plan` misread the question: wrong entity, wrong grain, wrong question understood
-- A `step_insight` shows it working from a premise you know to be false — a filter that excludes the population in question, a date range that isn't the one asked about
-- The user has said something that invalidates the direction the analysis is taking
+- The `interpretation` restates the question as something the user did not ask
+- A `step_insight` shows it working from a premise the user's request rules out — a filter that excludes the population in question, a date range other than the one asked about
+- The user has since said something that invalidates the direction
 
-A step whose purpose isn't obvious yet is not evidence — the plan may need it for a later step. When the analysis is merely slower or less direct than you would have been, let it finish.
+A plan that differs from the one you had in mind is not a misread. You handed over the goal because the analyst has context you lack, so an approach you would not have chosen is the expected case rather than a fault. Neither is a step whose purpose isn't obvious yet — the plan may need it later. When the analysis is merely slower or less direct than you would have been, let it finish.
 
 ### Explaining a Prior Analysis Step
 
@@ -427,7 +427,7 @@ Methods chain in both directions.
 
 **Discover → query → investigate** — explore the model, spot-check a field with a structured query, then hand the actual question to deep analysis.
 
-**Investigate → query** — let deep analysis answer the question, then use the field names, filters, and SQL it reports to run fast deterministic cuts of its result. See **Continuing Inside an Analysis** for which direction a given follow-up belongs in.
+**Investigate → query** — let deep analysis answer the question, then use the field names and filters it reports to run fast deterministic cuts of its result. See **Continuing Inside an Analysis** for which direction a given follow-up belongs in.
 
 ### Example Workflow
 
