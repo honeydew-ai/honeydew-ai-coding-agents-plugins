@@ -2,6 +2,15 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.3] - 2026-08-11
+
+### Fixed
+
+- **Guide hooks no longer repeat themselves or print into the transcript** — the `PreToolUse` guide hooks emitted `systemMessage`, which renders in the user's transcript, and kept no state, so every matching Honeydew MCP tool call re-printed the same skill reminder for the rest of the session. Four consecutive queries produced four identical notices. They now emit `hookSpecificOutput.additionalContext`, which reaches the model without rendering in the UI.
+- **Each reminder fires at most once per session, per skill** — tracked by a marker file keyed on `session_id`, so a metric and a domain created in one session still get their own guidance while a second metric does not repeat it.
+- **No reminder at all once the skill is loaded** — the hooks now check `transcript_path` for the skill, matching either the `Skill` tool_use record or the `<command-name>` slash-command form. Both structured forms are matched deliberately rather than the bare skill name: the reminder text itself contains the skill name, so a loose match would hit the hook's own earlier output and silence it permanently without the skill ever loading.
+- **Cheaper on the repeat path** — the marker is checked before the transcript scan, so calls after the first cost a `stat()` instead of a grep, and the redundant `jq` invocations in each script are collapsed into one. A repeat call drops from roughly 344 ms to 204 ms. Shared logic moved to `hooks/lib.sh`; object-type detection and all five YAML→skill mappings are unchanged.
+
 ## [1.3.2] - 2026-08-11
 
 ### Changed
