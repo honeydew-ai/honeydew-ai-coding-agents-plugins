@@ -50,6 +50,18 @@ When releasing a new version, update **all** of these files:
 
 Run `./scripts/validate-versions.sh` locally to confirm all files are in sync before pushing.
 
+## CHANGELOG Entries
+
+An entry tells someone installing the plugin what changed and whether they care. It is not the PR description and not a record of how the work went.
+
+- **One bullet per user-visible change.** The norm in this file is 1–3 bullets; 7 is a large release. A change needing a sub-list is usually several changes, or belongs in the PR.
+- **Two sentences per bullet, ~250–450 characters.** Bolded lead naming the change, then why it matters.
+- **Group under `### Added` / `### Changed` / `### Fixed`.**
+- **Write for the installer.** Name the skill, tool, or matcher they will notice — not functions, file paths, or line numbers.
+- **Fold in work that never shipped.** A bug introduced and fixed inside the same release is invisible to users; it gets no bullet.
+
+Keep in the PR description, out of the CHANGELOG: verification and test results, measurements, alternatives considered, known limitations, follow-up work.
+
 ## New Skill Checklist
 
 When adding a new skill, update **all** of these:
