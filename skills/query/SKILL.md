@@ -45,7 +45,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 **How it works:**
 
 - `get_data_from_fields` — executes the query and returns data rows
-- `get_sql_from_fields` — returns the generated SQL without executing (useful for review, debugging, or handing off to other tools)
+- `get_sql_from_fields` — returns the generated SQL without executing. Use it when the SQL itself is what's wanted: handing it to the warehouse, dbt, or another tool, or bisecting a failing query to watch a fragment appear and disappear (see the **query-debugging** skill). The output is long machine-generated SQL — to understand what a field computes, read the model with `get_field` / `get_entity` instead
 
 Both take the same field parameters.
 
@@ -202,6 +202,17 @@ Filters use standard comparison expressions: `=`, `>`, `<`, `IN (...)`, `ILIKE`,
 
 ## Method 2: Deep Analysis
 
+Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, which is why it is not the tool for fetching one number. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
+
+### Asking the Question
+
+State the goal, not the plan. The analyst has context you do not: instructions, knowledge, and conventions held in the semantic layer about which fields, filters, and definitions are correct for a given question. An over-constrained question suppresses that context twice over — the steps you prescribe may be wrong because you are missing it, and a question that already contains a full plan gives the analyst little reason to load it.
+
+- Ask: "What's driving the revenue decline in Q3?"
+- Not: "Compare revenue by category and region for Q3 vs Q2, then rank categories by delta."
+
+Add precision through follow-ups instead, once the interpretation and plan come back — by then the analyst has its context loaded and a specific redirection lands on top of it rather than in place of it.
+
 ### initiate_analysis + monitor_analysis
 
 Deep analysis is a two-step async process:
@@ -236,17 +247,11 @@ Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is 
 - If several steps have passed without a user-facing update, post a brief aggregate — e.g. *"Analyzed pricing by neighbourhood, computed averages, filtered outliers"* — so the user knows progress is being made
 - On internal errors, retries, or backtracking steps: skip reporting — the user doesn't need to know the agent corrected itself, only that meaningful progress is being made
 
-When `status` is `"DONE"`, the final user-facing report is in the `responses` array. If the user then expresses satisfaction or dissatisfaction with the result, call `provide_analysis_feedback` with the `conversation_id`:
-
-- **Positive**: a short affirmative string, e.g. `"Good"`
-- **Negative**: `<Reason>: <details>` where `Reason` is one of `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other` — e.g. `"Data Issue: revenue figures don't match our BI tool"`
-- **Clear existing feedback**: pass `null`
-
-Trigger this when the user says things like: "that was correct", "that's wrong", "the data looks off", "great analysis", "this is incorrect because..."
+When `status` is `"DONE"`, the final user-facing report is in the `responses` array.
 
 ```
 # Example
-initiate_analysis(question="Analyze revenue by cuisine type", agent="my_agent")
+initiate_analysis(question="What's driving revenue across cuisine types?", agent="my_agent")
 → { conversation_id: "abc123", ui_url: "https://..." }
 
 # Poll loop — report to user after each call that has new content
@@ -265,6 +270,32 @@ monitor_analysis(conversation_id="abc123")
 → { status: "DONE", responses: [{ text: "..." }] }
 ```
 
+### Feedback on a Finished Analysis
+
+`provide_analysis_feedback` attaches feedback to a `conversation_id`:
+
+- **Positive**: a short affirmative string, e.g. `"Good"`
+- **Negative**: `<Reason>: <details>` where `Reason` is one of `Chart Issue`, `Data Issue`, `Wrong Judgement`, or `Other` — e.g. `"Data Issue: revenue figures don't match our BI tool"`
+- **Clear existing feedback**: pass `null`
+
+There is one entry per conversation, covering the conversation as a whole, and a second call overwrites the first — so **the user's judgement always wins**. Never overwrite feedback the user gave with your own.
+
+**From the user** — trigger when the user says things like: "that was correct", "that's wrong", "the data looks off", "great analysis", "this is incorrect because...". Record what they said.
+
+**On your own initiative** — only from evidence, never from satisfaction. You asked the question, so "it answered what I needed" or "the numbers look plausible" is self-assessment: biased in your own favour, and it dilutes the feedback curators review. What qualifies is a check you can name:
+
+- The result disagrees with, or confirms, an independent source — a structured query over the same fields and filters, a figure the user supplied, a documented value
+- A data defect visible in the result — impossible nulls, counts inflated by a fan-out join, two routes to the same number disagreeing
+- A conclusion the analysis's own numbers do not support
+- A chart that misrepresents the data it plots
+
+Tag it `[agent]` and name the evidence, so a review pass can separate agent-sourced feedback from the user's. Keep `<Reason>:` leading on negative feedback so the reason stays machine-readable:
+
+- `"Data Issue: [agent] reported total revenue 4.2M, but get_data_from_fields on order_detail.revenue with the same date filter returns 3.8M"`
+- `"[agent] verified against an independent structured query on order_detail.revenue by menu.item_category for 2021 — figures match"`
+
+With no check to name, leave no feedback. That is a correct outcome, not a skipped step.
+
 ### Follow-up Questions
 
 Use `conversation_id` from the previous analysis to ask follow-up questions that build on prior state. **Start a new conversation (omit `conversation_id`) when the topic changes completely** — reusing a conversation for an unrelated question carries stale context into the new analysis and can skew results.
@@ -276,11 +307,38 @@ initiate_analysis(
 )
 ```
 
-### Aborting and Resuming an Analysis
+### Continuing Inside an Analysis
 
-Aborting stops the current execution run but preserves all conversation state — groups already computed remain available. Resume by sending a new `initiate_analysis` with the same `conversation_id`; the analysis will reuse prior results rather than restarting from scratch.
+Once a conversation exists, each next question is a choice between a follow-up and dropping out to a structured query.
 
-Always abort when the user asks. Initiating an abort on your own (without the user asking) is reserved for extreme cases where the analysis is clearly going badly off track — normally let it finish and redirect via a follow-up question.
+**Send a follow-up when:**
+
+- The next step needs reasoning rather than a different breakdown — "does the pattern hold if we control for market size?", "why is that outlier there?"
+- The next step builds on groups the conversation already computed. Structured queries cannot express intermediate computed groups — ranks, table calculations, filtering on a rank. A ranking the analysis has already built is reusable for free inside the conversation, and would have to be rebuilt by hand outside it
+- The user is following the `ui_url` and expects one coherent thread
+
+**Drop out to `get_data_from_fields` when:**
+
+- You need the raw numbers behind a specific claim the analysis made
+- You want another slice of a metric the analysis has already established
+- It is a distinct-values or count lookup
+- You want a result that is deterministic and reproducible
+
+A finished analysis is also the best source of field names for structured queries: it reports the exact `entity.field` references and filters it used, and `get_analysis_step_details` gives the semantic query and compiled SQL per step. Feed those into `get_data_from_fields` instead of rediscovering them from `list_entities`.
+
+### Interrupting and Resuming an Analysis
+
+`abort_analysis` with the `conversation_id` stops the current execution run. It is an interrupt, not a cancel: all conversation state survives, including groups already computed. Resume with a new `initiate_analysis` on the same `conversation_id` and the analysis continues from the aborted point, reusing prior results rather than restarting.
+
+**The question you send on resume is the correction.** Interrupt-and-resume is how you steer an analysis mid-flight, rather than waiting for a wrong direction to run to completion and correcting afterwards.
+
+Always abort when the user asks. On your own initiative, abort when you have evidence the direction is wrong — not a hunch:
+
+- The `interpretation` or `plan` misread the question: wrong entity, wrong grain, wrong question understood
+- A `step_insight` shows it working from a premise you know to be false — a filter that excludes the population in question, a date range that isn't the one asked about
+- The user has said something that invalidates the direction the analysis is taking
+
+A step whose purpose isn't obvious yet is not evidence — the plan may need it for a later step. When the analysis is merely slower or less direct than you would have been, let it finish.
 
 ### Explaining a Prior Analysis Step
 
@@ -365,11 +423,11 @@ This is a distinct workflow from querying data — see the dedicated **query-deb
 
 ## Combining Methods
 
-For complex tasks, combine methods in sequence:
+Methods chain in both directions.
 
-1. **Discover** — Use `list_entities` / `get_entity` to understand the model
-2. **Query** — Use `get_data_from_fields` for precise, targeted queries
-3. **Investigate** — Use `initiate_analysis` + `monitor_analysis` for root cause or trend analysis
+**Discover → query → investigate** — explore the model, spot-check a field with a structured query, then hand the actual question to deep analysis.
+
+**Investigate → query** — let deep analysis answer the question, then use the field names, filters, and SQL it reports to run fast deterministic cuts of its result. See **Continuing Inside an Analysis** for which direction a given follow-up belongs in.
 
 ### Example Workflow
 
@@ -378,7 +436,8 @@ User: "Help me understand pricing patterns for Airbnb listings."
 1. Discover entities: `list_entities` → find `detailed_listings`
 2. Explore fields: `get_entity` for `detailed_listings` → find `price`, `room_type`, `neighbourhood_cleansed`
 3. Targeted query: `get_data_from_fields` → price distribution by neighbourhood for Entire homes only
-4. Deep dive: `initiate_analysis` → "What factors most influence listing price? Analyze correlations with room type, location, amenities, and reviews."
+4. Deep dive: `initiate_analysis` → "What factors most influence listing price?"
+5. Follow up on its result: `get_data_from_fields` with the fields the analysis reported → the exact numbers behind the driver it identified
 
 ---
 
@@ -432,8 +491,10 @@ If your environment has visualization tools, render visualizations when they wou
 - **Start with discovery** — always check `list_entities` / `get_entity` before building queries, so you reference real fields
 - **Use structured queries for precision** — when you know the fields, `get_data_from_fields` gives you full control and reproducible results
 - **Use deep analysis for insight** — anything beyond a lookup goes to `initiate_analysis`: "why", "how", trends, drivers, or any question needing more than one query. Let the analysis engine plan the investigation instead of chaining structured queries by hand
+- **Delegate the goal, not the plan** — an over-specified question suppresses the semantic-layer context the analyst would otherwise load, and the steps you prescribe may be wrong precisely because you lack that context. Add precision in follow-ups
+- **Stay in the conversation for reasoning, drop out for slices** — follow up when the next step needs reasoning or reuses groups the analysis already computed; use `get_data_from_fields` when you just need deterministic numbers
 - **Report meaningful progress, not every step** — surface a one-liner when a step produces a substantive finding; skip internal retries and error-recovery steps the user doesn't need to see
 - **Explain a prior step** — use `get_analysis_step_details` with the `step_id`; the response includes the semantic query, data results, and SQL for that step
 - **Paginate large results** — use `limit` and `offset` in `get_data_from_fields` to avoid overwhelming output
-- **Show SQL when debugging** — use `get_sql_from_fields` to inspect the generated query
+- **Debug against the model, not the generated SQL** — to understand what a metric or attribute computes, read `get_field` / `get_entity`; the compiled SQL is long machine output and is rarely the shortest route to the answer
 - **Reference fields correctly** — always use `entity.field_name` syntax in field parameters
