@@ -315,7 +315,6 @@ Once a conversation exists, each next question is a choice between a follow-up a
 
 - The next step needs reasoning rather than a different breakdown — "does the pattern hold if we control for market size?", "why is that outlier there?"
 - The next step builds on groups the conversation already computed. A structured query cannot express these ad hoc — ranks, table calculations, filtering on a rank exist as calculated attributes in the model, not as something a query can compute on the fly. A ranking the analysis has already built is reusable for free inside the conversation, and outside it would have to be modelled or rebuilt by hand
-- The user is following the `ui_url` and expects one coherent thread
 
 **Drop out to `get_data_from_fields` when:**
 
@@ -323,6 +322,8 @@ Once a conversation exists, each next question is a choice between a follow-up a
 - You want another slice of a metric the analysis has already established
 - It is a distinct-values or count lookup
 - You want a result that is deterministic and reproducible
+
+Only work done inside the conversation shows up at the `ui_url` you gave the user. Numbers you produce with a structured query afterwards won't be there, so report them yourself rather than leaving a gap between what the app shows and what you say.
 
 A finished analysis is also the best source of field names for structured queries: it reports the exact `entity.field` references and filters it used, and `get_analysis_step_details` gives the semantic query behind any step. Feed those attributes, metrics, and filters into `get_data_from_fields` instead of rediscovering them from `list_entities`. The compiled SQL a step also returns is not an input to `get_data_from_fields` — it is for reading or handing to the warehouse.
 
