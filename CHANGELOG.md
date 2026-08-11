@@ -2,6 +2,18 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.2] - 2026-08-11
+
+### Changed
+
+- **Frame deep analysis as an analyst sub-agent you delegate to** — `initiate_analysis` was documented as a tool to call, so the rules around it (redirect instead of aborting, a fresh conversation on topic change, follow-ups by `conversation_id`) read as API conventions with nothing behind them. Method 2 now opens by describing it as a stateful, resumable analyst sub-agent that plans its own investigation.
+- **Ask for the goal, not the plan** — a new `Asking the Question` section, because an over-constrained question suppresses the semantic-layer context that is the reason to use deep analysis at all. Mirrored in `model-exploration` at the handoff point, and the two worked examples that prescribed dimensions and correlations to the analyst are rewritten.
+- **Document what to do once inside an analysis** — a new `Continuing Inside an Analysis` section: follow up when the next step needs reasoning or reuses groups the conversation already computed, drop out to `get_data_from_fields` for deterministic slices. `Combining Methods` now records the investigate → query direction, since a finished analysis reports the exact field names a structured query needs.
+- **Document abort as an interrupt, not a cancel** — the section never named `abort_analysis` and told the reader to let a misdirected analysis finish. Abort preserves conversation state and the question sent on resume is the correction, so interrupt-and-resume is how to steer mid-flight; self-initiated aborts are gated on a contradiction with what the user asked for, not on a plan differing from the one the caller had in mind.
+- **Sync the routing summary with the decision flow** — the Overview table and the deep-analysis `Use when` list still led with field knowledge, the discriminator 1.3.1 removed from the flow itself.
+- **Stop pointing debugging at the generated SQL** — its output is long machine-generated SQL, and the model it compiled from is the better source for what a field computes. `get_sql_from_fields` is now scoped to handing the SQL onwards and to bisecting a failing query, with debugging pointed at `get_field` / `get_entity`.
+- **Gate `provide_analysis_feedback` on evidence rather than satisfaction** — it sat inline in the analysis lifecycle as a closing step, and an agent rating an analysis it asked for itself is self-assessment. Now its own section: there is one entry per conversation, so the user's judgement must never be overwritten, and agent-initiated feedback is allowed only from a check it can name, tagged `[agent]`.
+
 ## [1.3.1] - 2026-08-04
 
 ### Changed

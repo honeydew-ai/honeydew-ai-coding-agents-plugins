@@ -11,6 +11,8 @@ This skill discovers and verifies the **model**. It does not answer questions ab
 
 When the goal is to understand, explain, or investigate something in the data — "how does this customer use the system", "why did revenue drop", "what drives churn", or anything that becomes a report — use the **query** skill's deep analysis (`initiate_analysis` + `monitor_analysis`). Honeydew's analysis engine plans and runs the multi-step investigation itself; hand it the question rather than decomposing it into structured queries yourself. This holds even when already mid-exploration and the field names are known.
 
+Hand it the goal, not a plan built from what exploration just found. The fields you discovered here are a subset of the context the analyst has, and a question that prescribes the exact dimensions and steps suppresses the rest of it — see **Asking the Question** in the `query` skill.
+
 `get_data_from_fields` in this skill is for spot-checks: confirm a field's values, verify a count, sample rows. Exact numbers from a spot-check are not an analysis — running a third structured query to assemble an answer is the signal to escalate to deep analysis.
 
 ## When To Use This Skill
