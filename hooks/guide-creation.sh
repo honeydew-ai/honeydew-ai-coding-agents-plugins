@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-input=$(cat)
-tool_name=$(printf '%s' "$input" | jq -r '.tool_name // ""')
-yaml_text=$(printf '%s' "$input" | jq -r '.tool_input.yaml_text // .tool_input.entity_yaml // ""')
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+
+hd_read_input
 
 skill_hint=""
 
@@ -18,23 +18,22 @@ case "$tool_name" in
     skill_hint="honeydew-ai:entity-creation"
     ;;
   *create_object*|*update_object*)
-    # Detect object type by searching yaml_text using jq (avoids newline issues)
-    if printf '%s' "$input" | jq -e '.tool_input.yaml_text // "" | test("type:\\s*metric")' > /dev/null 2>&1; then
-      skill_hint="honeydew-ai:metric-creation"
-    elif printf '%s' "$input" | jq -e '.tool_input.yaml_text // "" | test("type:\\s*attribute")' > /dev/null 2>&1; then
-      skill_hint="honeydew-ai:attribute-creation"
-    elif printf '%s' "$input" | jq -e '.tool_input.yaml_text // "" | test("type:\\s*domain")' > /dev/null 2>&1; then
-      skill_hint="honeydew-ai:domain-creation"
-    elif printf '%s' "$input" | jq -e '.tool_input.yaml_text // "" | test("type:\\s*entity")' > /dev/null 2>&1; then
-      skill_hint="honeydew-ai:entity-creation"
-    elif printf '%s' "$input" | jq -e '.tool_input.yaml_text // "" | test("relations:")' > /dev/null 2>&1; then
-      skill_hint="honeydew-ai:relation-creation"
-    fi
+    # Detect object type by searching yaml_text with jq (avoids newline issues)
+    skill_hint=$(printf '%s' "$hd_input" | jq -r '
+      (.tool_input.yaml_text // "") as $y
+      | if   ($y | test("type:\\s*metric"))    then "honeydew-ai:metric-creation"
+        elif ($y | test("type:\\s*attribute")) then "honeydew-ai:attribute-creation"
+        elif ($y | test("type:\\s*domain"))    then "honeydew-ai:domain-creation"
+        elif ($y | test("type:\\s*entity"))    then "honeydew-ai:entity-creation"
+        elif ($y | test("relations:"))          then "honeydew-ai:relation-creation"
+        else "" end' 2>/dev/null || true)
     ;;
 esac
 
 if [ -n "$skill_hint" ]; then
-  printf '{"systemMessage": "You are about to create or modify a Honeydew object. If you have not already loaded the relevant skill, invoke the Skill tool with skill '"'"'%s'"'"' BEFORE proceeding. The skill contains critical guidance on required fields, naming conventions, and correct YAML structure. After creation, always run the '"'"'honeydew-ai:validation'"'"' skill to verify the object works correctly."}\n' "$skill_hint"
+  hd_should_remind "$session_id" "$transcript" "$skill_hint" || exit 0
+  hd_emit "You are about to create or modify a Honeydew object. If you have not already loaded the relevant skill, invoke the Skill tool with skill '$skill_hint' BEFORE proceeding. The skill contains critical guidance on required fields, naming conventions, and correct YAML structure. After creation, always run the 'honeydew-ai:validation' skill to verify the object works correctly."
 else
-  printf '%s\n' '{"systemMessage": "You are about to create or modify a Honeydew object. If you have not already loaded the relevant skill, invoke the appropriate Skill tool BEFORE proceeding. Available skills: honeydew-ai:metric-creation (metrics), honeydew-ai:attribute-creation (attributes), honeydew-ai:entity-creation (entities), honeydew-ai:relation-creation (relations), honeydew-ai:domain-creation (domains), honeydew-ai:context-item-creation (context items). After creation, always run honeydew-ai:validation."}'
+  hd_first_time "$session_id" "creation-generic" || exit 0
+  hd_emit "You are about to create or modify a Honeydew object. If you have not already loaded the relevant skill, invoke the appropriate Skill tool BEFORE proceeding. Available skills: honeydew-ai:metric-creation (metrics), honeydew-ai:attribute-creation (attributes), honeydew-ai:entity-creation (entities), honeydew-ai:relation-creation (relations), honeydew-ai:domain-creation (domains), honeydew-ai:context-item-creation (context items). After creation, always run honeydew-ai:validation."
 fi
