@@ -99,7 +99,8 @@ Steps 2–4 are the hand-maintained registrations; `./scripts/validate-skills.sh
 - Codex marketplace metadata lives in `.agents/plugins/marketplace.json`
 - `.mcp.json`: present in Claude, Cursor, and root (`.mcp.json`); GitHub does not use `.mcp.json`
 - `marketplace.json`: all three (`.claude-plugin/`, `.cursor-plugin/`, `.github/plugin/`) must be kept in sync
-- Hooks: Claude Code auto-discovers `hooks/hooks.json`; Codex needs the explicit `"hooks": "./hooks/hooks.json"` entry in `.codex-plugin/plugin.json` **and** the `hooks` symlink in `plugins/honeydew-ai/`. Both harnesses use the same event schema, the same `mcp__<server>__<tool>` matchers and the same `permissionDecision` output, so one set of scripts serves both — Cursor, Copilot and Gemini do not run them.
+- Hooks: Claude Code auto-discovers `hooks/hooks.json`. Codex needs the `hooks` symlink in `plugins/honeydew-ai/` — without it there is nothing to discover — plus `"hooks": "./hooks/hooks.json"` in `.codex-plugin/plugin.json`. Per Codex's plugin spec, manifest paths "are supplemented on top of default component discovery", so that entry may be redundant rather than required; it is kept as belt-and-braces and is safe either way, since a double registration degrades to one deny via the atomic marker. Unverified against a live Codex run. Both harnesses share the event schema, the `mcp__<server>__<tool>` matchers and the `permissionDecision` output, so one set of scripts serves both — Cursor, Copilot and Gemini do not run them.
+- Never treat a `SKILL.md` path in a transcript as evidence a skill is loaded. Codex opens every session with a catalog listing each installed skill and its file path, and the same substring appears whenever an agent greps this repo, so a path match silently disables the hook gate on both harnesses.
 
 ## CI
 

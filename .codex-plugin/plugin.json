@@ -27,10 +27,7 @@
     "longDescription": "Honeydew AI provides Codex skills for exploring semantic models, querying governed data, creating entities, attributes, metrics, relations, and domains, and validating modeling changes through the Honeydew MCP.",
     "developerName": "Honeydew AI",
     "category": "Productivity",
-    "capabilities": [
-      "Interactive",
-      "Write"
-    ],
+    "capabilities": ["Interactive", "Write"],
     "websiteURL": "https://honeydew.ai",
     "privacyPolicyURL": "https://honeydew.ai/privacy-policy",
     "termsOfServiceURL": "https://honeydew.ai/terms-of-service",

@@ -12,22 +12,32 @@
 #   * At most one deny per (session, skill). The marker is claimed by the deny
 #     itself, so a model that retries without loading the skill is never
 #     blocked a second time and cannot be locked out of Honeydew.
-#   * Any uncertainty allows the call. A skill that is not installed, state
-#     that cannot be recorded, a payload that will not parse -- each of these
-#     lets the tool through rather than blocking work on a hook's bad day.
+#   * Uncertainty about the hook's own footing allows the call: a skill that is
+#     not installed, state that cannot be recorded, a payload that will not
+#     parse. None of these block work on a hook's bad day.
+#   * Not being able to prove the skill is loaded -- no transcript, or a
+#     transcript without a load record -- does block, once. That is the gate
+#     doing its job, and it is bounded by the one-block-per-skill rule.
 #
-# Known limitation: the loaded-skill check reads the transcript, which keeps its
-# pre-compaction records, and markers live for a week. After /compact or
-# --resume a skill can read as loaded while its content is gone from context.
+# Known limitations of reading the transcript to decide whether a skill loaded:
+#
+#   * It keeps pre-compaction records, and markers live for a week, so after
+#     /compact or --resume a skill can read as loaded while its content is gone.
+#   * A transcript that quotes a load pattern as ordinary text -- a session
+#     working on these hooks, printing '<command-name>/honeydew-ai:query...'
+#     to check it -- reads as a load. Only self-referential sessions like that
+#     hit it, and it fails open (allows the call), so it costs a gate, not work.
+#     Fixing it properly means parsing each record structurally instead of
+#     grepping raw text.
 
 HD_STATE_ROOT="${TMPDIR:-/tmp}/honeydew-ai-hooks"
 
-# Where the skills ship, resolved next to these hooks. Codex sets PLUGIN_ROOT
-# (and CLAUDE_PLUGIN_ROOT for compatibility), so either serves as a fallback if
-# the hook is ever invoked in a way that hides its own path.
-HD_SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills" 2>/dev/null && pwd)" \
-  || HD_SKILLS_DIR="$(cd "${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-/nonexistent}}/skills" 2>/dev/null && pwd)" \
-  || HD_SKILLS_DIR=""
+# Where the skills ship, resolved next to these hooks. hooks.json invokes the
+# scripts by absolute path, and bash's logical cd resolves ../skills correctly
+# even through the plugins/honeydew-ai/hooks wrapper symlink, so no plugin-root
+# env fallback is needed: if that path did not expand, this file was never
+# sourced in the first place.
+HD_SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills" 2>/dev/null && pwd)" || HD_SKILLS_DIR=""
 
 # Filesystem-safe form of an arbitrary string.
 hd_slug() { printf '%s' "${1//[^A-Za-z0-9._-]/_}"; }
@@ -58,20 +68,35 @@ hd_skill_available() {
 
 # hd_skill_loaded <transcript_path> <skill>
 # Claude Code records a load as a Skill tool_use record or a slash command;
-# Codex records a [$name](path/SKILL.md) reference or a read of the file itself.
-# Both harnesses' forms are matched, since one set of scripts serves both.
+# Codex records it as a [$name](...) markdown reference.
 #
-# Every pattern is structural. Matching the bare skill name would also match
-# this hook's own reason text, disabling the check without the skill ever
-# loading -- which is why the short name is only ever matched inside [$...] or
-# a SKILL.md path.
+# Every pattern must be structural -- tied to the shape of a record that only
+# exists because a skill was loaded. A SKILL.md *path* is emphatically not such
+# a pattern, and matching one is a mistake worth naming: Codex opens every
+# session with a catalog of installed skills, each listed with its own
+# "(file: .../skills/<name>/SKILL.md)", so a path match reads as "loaded" from
+# turn 1 and no call is ever gated. The same substring appears whenever an
+# agent greps or edits this repo, which silently disabled the gate on Claude
+# Code too. A skill being listed, read, or discussed is not a skill in context.
+#
+# Consequence on Codex, accepted deliberately: the catalog gives the model
+# descriptions, not skill content, so "not loaded" is usually the truth there
+# and the first Honeydew call per skill is blocked once. That is the design --
+# one bounded block, then the retry proceeds.
+# Each harness is matched only against its own forms. Pooling them meant a
+# Claude Code session that merely printed Codex's [$name](...) syntax -- writing
+# these hooks, for one -- suppressed its own gate.
 hd_skill_loaded() {
   local transcript="$1" skill="$2" short="${2#*:}"
   [ -n "$transcript" ] && [ -f "$transcript" ] || return 1
-  grep -qF -e "\"name\":\"Skill\",\"input\":{\"skill\":\"$skill\"" \
-           -e "<command-name>/$skill</command-name>" \
-           -e "[\$$short]" \
-           -e "skills/$short/SKILL.md" -- "$transcript"
+  if head -n 1 -- "$transcript" 2>/dev/null | grep -qE '"type": *"session_meta"'; then
+    # Codex rollout: a load is a [$name](...) reference the user actually sent,
+    # so the match is scoped to a user_message record rather than loose prose.
+    grep -qE "\"type\": *\"user_message\".*\[\\\$${short}\]\(" -- "$transcript"
+  else
+    grep -qF -e "\"name\":\"Skill\",\"input\":{\"skill\":\"$skill\"" \
+             -e "<command-name>/$skill</command-name>" -- "$transcript"
+  fi
 }
 
 # hd_first_time <session_id> <transcript_path> <key>
@@ -131,11 +156,11 @@ hd_deny() {
 }
 
 # hd_emit <text> -- advisory only, for the case where no specific skill can be
-# named and there is thus nothing to block on. Reaches the model without
-# rendering in the transcript; suppressOutput states that explicitly.
+# named and there is thus nothing to block on. additionalContext reaches the
+# model without rendering in the transcript. No suppressOutput: Codex rejects
+# that field on PreToolUse and would discard the whole payload.
 hd_emit() {
   jq -n --arg ctx "$1" '{
-    suppressOutput: true,
     hookSpecificOutput: {hookEventName: "PreToolUse", additionalContext: $ctx}
   }'
 }
