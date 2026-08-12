@@ -21,7 +21,13 @@
 # --resume a skill can read as loaded while its content is gone from context.
 
 HD_STATE_ROOT="${TMPDIR:-/tmp}/honeydew-ai-hooks"
-HD_SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills" 2>/dev/null && pwd)" || HD_SKILLS_DIR=""
+
+# Where the skills ship, resolved next to these hooks. Codex sets PLUGIN_ROOT
+# (and CLAUDE_PLUGIN_ROOT for compatibility), so either serves as a fallback if
+# the hook is ever invoked in a way that hides its own path.
+HD_SKILLS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../skills" 2>/dev/null && pwd)" \
+  || HD_SKILLS_DIR="$(cd "${PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-/nonexistent}}/skills" 2>/dev/null && pwd)" \
+  || HD_SKILLS_DIR=""
 
 # Filesystem-safe form of an arbitrary string.
 hd_slug() { printf '%s' "${1//[^A-Za-z0-9._-]/_}"; }
@@ -51,14 +57,21 @@ hd_skill_available() {
 }
 
 # hd_skill_loaded <transcript_path> <skill>
-# Matches the Skill tool_use record or the slash-command form specifically.
-# A bare skill-name grep would also match our own reason text, so the hook
-# would stop firing after the first block without the skill ever loading.
+# Claude Code records a load as a Skill tool_use record or a slash command;
+# Codex records a [$name](path/SKILL.md) reference or a read of the file itself.
+# Both harnesses' forms are matched, since one set of scripts serves both.
+#
+# Every pattern is structural. Matching the bare skill name would also match
+# this hook's own reason text, disabling the check without the skill ever
+# loading -- which is why the short name is only ever matched inside [$...] or
+# a SKILL.md path.
 hd_skill_loaded() {
-  local transcript="$1" skill="$2"
+  local transcript="$1" skill="$2" short="${2#*:}"
   [ -n "$transcript" ] && [ -f "$transcript" ] || return 1
   grep -qF -e "\"name\":\"Skill\",\"input\":{\"skill\":\"$skill\"" \
-           -e "<command-name>/$skill</command-name>" -- "$transcript"
+           -e "<command-name>/$skill</command-name>" \
+           -e "[\$$short]" \
+           -e "skills/$short/SKILL.md" -- "$transcript"
 }
 
 # hd_first_time <session_id> <transcript_path> <key>
@@ -130,5 +143,5 @@ hd_emit() {
 # hd_retry_note <skill> -- shared tail: say the block is one-shot, so a model
 # that cannot load the skill does not conclude Honeydew is unavailable.
 hd_retry_note() {
-  printf "Invoke the Skill tool with skill '%s', then repeat this call. This check blocks a call only once per session, so the retry will go through either way." "$1"
+  printf "Load the '%s' skill -- the Skill tool on Claude Code, its SKILL.md on Codex -- then repeat this call. This check blocks a call only once per session, so the retry will go through either way." "$1"
 }

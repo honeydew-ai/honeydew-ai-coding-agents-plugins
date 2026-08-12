@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.4] - 2026-08-12
+
+### Added
+
+- **Codex runs the guide hooks too** — the Codex manifest now declares `hooks/hooks.json` and the Codex wrapper ships the `hooks` directory, so Honeydew MCP calls from Codex are gated on their skill exactly as in Claude Code. Codex records a skill load differently, and those forms are recognised, so a skill already in context does not trigger a block.
+
 ## [1.3.3] - 2026-08-11
 
 ### Changed

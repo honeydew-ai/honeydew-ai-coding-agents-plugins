@@ -1,6 +1,6 @@
 {
   "name": "honeydew-ai",
-  "version": "1.3.3",
+  "version": "1.3.4",
   "description": "Skills and tools powered by the Honeydew MCP that help coding agents query data and build semantic models",
   "author": {
     "name": "Honeydew AI",
@@ -19,6 +19,7 @@
     "querying"
   ],
   "skills": "./skills/",
+  "hooks": "./hooks/hooks.json",
   "mcpServers": "./.mcp.json",
   "interface": {
     "displayName": "Honeydew AI",
@@ -26,7 +27,10 @@
     "longDescription": "Honeydew AI provides Codex skills for exploring semantic models, querying governed data, creating entities, attributes, metrics, relations, and domains, and validating modeling changes through the Honeydew MCP.",
     "developerName": "Honeydew AI",
     "category": "Productivity",
-    "capabilities": ["Interactive", "Write"],
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
     "websiteURL": "https://honeydew.ai",
     "privacyPolicyURL": "https://honeydew.ai/privacy-policy",
     "termsOfServiceURL": "https://honeydew.ai/terms-of-service",
