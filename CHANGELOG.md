@@ -2,6 +2,18 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.3] - 2026-08-11
+
+### Changed
+
+- **Honeydew tool calls now require their skill rather than suggesting it** — query, exploration and typed create/update calls are blocked once per session when the matching skill is not loaded, and the reason names the skill to load before retrying. Injected context could not do this: it arrives with the tool result, after the call has already run.
+- **A block can never wedge a workflow** — it happens at most once per skill, so a retry always goes through, and anything uncertain (skill not installed, unwritable state, unparseable payload) lets the call proceed.
+
+### Fixed
+
+- **Skill reminders no longer repeat on every tool call** — they rendered in the transcript and kept no state, so four consecutive queries produced four identical notices. Guidance now fires at most once per session per skill, and not at all once the skill is loaded.
+- **Deep analysis was never covered** — the query matcher named `ask_deep_analysis_question`, which this MCP server does not expose, so `initiate_analysis` matched no hook and got no guidance.
+
 ## [1.3.2] - 2026-08-11
 
 ### Changed
