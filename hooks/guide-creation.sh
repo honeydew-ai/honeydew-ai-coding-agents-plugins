@@ -38,5 +38,5 @@ else
   # unrecognised payload would stop work over a guess, so this path stays
   # advisory: name the candidates once and let the call through.
   hd_first_time "$session_id" "$transcript" "creation-generic" || exit 0
-  hd_emit "This session is creating or modifying Honeydew objects. If you have not already loaded the relevant skill, invoke the appropriate Skill tool before your next create or update call. Available skills: honeydew-ai:metric-creation (metrics), honeydew-ai:attribute-creation (attributes), honeydew-ai:entity-creation (entities), honeydew-ai:relation-creation (relations), honeydew-ai:domain-creation (domains), honeydew-ai:context-item-creation (context items). After creation, always run honeydew-ai:validation."
+  hd_emit "This session is creating or modifying Honeydew objects. If you have not already loaded the relevant skill, load the appropriate skill before your next create or update call. Available skills: honeydew-ai:metric-creation (metrics), honeydew-ai:attribute-creation (attributes), honeydew-ai:entity-creation (entities), honeydew-ai:relation-creation (relations), honeydew-ai:domain-creation (domains), honeydew-ai:context-item-creation (context items). After creation, always run honeydew-ai:validation."
 fi

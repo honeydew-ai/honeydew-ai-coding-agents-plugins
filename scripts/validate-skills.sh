@@ -105,9 +105,24 @@ elif [[ "${stated}" != "${count}" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Codex wrapper symlinks. Codex marketplace entries must point at a non-empty
+# plugin path, so plugins/honeydew-ai/ mirrors the root plugin by symlink. A
+# missing link ships that component to Codex as if it did not exist -- which is
+# exactly how Codex went without hooks until 1.3.4 -- and nothing else in CI
+# looks at this directory.
+for link in hooks skills .mcp.json .codex-plugin assets; do
+  target="plugins/honeydew-ai/${link}"
+  if [[ ! -L "${target}" ]]; then
+    fail "MISSING   plugins/honeydew-ai/: ${link} is not a symlink"
+  elif [[ ! -e "${target}" ]]; then
+    fail "BROKEN    plugins/honeydew-ai/${link} points at a missing target"
+  fi
+done
+
+# ---------------------------------------------------------------------------
 
 if [[ "${errors}" -eq 0 ]]; then
-  echo "All ${count} skills registered in the Copilot array, Cursor symlinks and README."
+  echo "All ${count} skills registered in the Copilot array, Cursor symlinks and README; Codex wrapper symlinks intact."
 else
   echo
   echo "error: ${errors} skill registration problem(s) found." >&2
