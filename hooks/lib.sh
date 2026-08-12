@@ -83,6 +83,7 @@ hd_skill_available() {
 # descriptions, not skill content, so "not loaded" is usually the truth there
 # and the first Honeydew call per skill is blocked once. That is the design --
 # one bounded block, then the retry proceeds.
+#
 # Each harness is matched only against its own forms. Pooling them meant a
 # Claude Code session that merely printed Codex's [$name](...) syntax -- writing
 # these hooks, for one -- suppressed its own gate.
@@ -130,8 +131,14 @@ hd_read_input() {
   tool_name=""; session_id=""; transcript=""
   hd_input="$(cat)" || hd_input=""
   local parsed
+  # agent_transcript_path is the subagent-turn fallback: without it a Honeydew
+  # call inside a Codex subagent has no transcript to read and gets blocked once
+  # for no reason. Defensive -- that payload shape is not verified here.
   parsed="$(printf '%s' "$hd_input" | jq -r '
-    (.tool_name // ""), (.session_id // ""), (.transcript_path // "")' 2>/dev/null)" \
+    (.tool_name // ""),
+    (.session_id // ""),
+    (if (.transcript_path // "") != "" then .transcript_path
+     else (.agent_transcript_path // "") end)' 2>/dev/null)" \
     || return 0
   {
     read -r tool_name || true
