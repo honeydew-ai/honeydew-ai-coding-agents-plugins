@@ -79,6 +79,18 @@ SUM(orders.amount) GROUP BY (orders.customer_id)
 SUM(orders.amount) GROUP BY (*, orders.order_date)
 ```
 
+`GROUP BY (dim)` groups by `dim` alone, regardless of the query's own groups, so the metric returns
+one row per `dim` value with those groups repeating across them. `GROUP BY (*, dim)` adds `dim` to
+the query's groups instead. The difference carries into an outer aggregation:
+
+```sql
+-- One value for the whole query
+MAX(orders.revenue GROUP BY (orders.order_date))
+
+-- One value per group the query asks for
+MAX(orders.revenue GROUP BY (*, orders.order_date))
+```
+
 ### Cross-entity counts
 
 When the goal is to count members of a related entity that appear in the source (e.g.
