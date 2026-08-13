@@ -173,6 +173,11 @@ aggregation** — see reference.md for the full named-metric ↔ raw fallback ta
 - ✅ `order_header.total_revenue GROUP BY (order_header.order_date)`
 - ❌ `order_header.total_revenue` ← requires manual grouping at query time
 
+- `GROUP BY (dim)` groups by `dim` alone, regardless of the query's own groups: one row per `dim`
+  value, with the query's groups repeating across them.
+- `GROUP BY (*, dim)` adds `dim` to the query's groups. An outer aggregation over it returns one
+  value per group the query asks for; over a fixed grouping, one value for the whole query.
+
 ---
 
 ## Additional Grouping Clarifications
