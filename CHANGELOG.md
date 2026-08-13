@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.5] - 2026-08-13
+
+### Changed
+
+- **`metric-creation` says what each grouping form returns** — a fixed `GROUP BY (dim)` groups by `dim` alone, regardless of the query's own groups, while `GROUP BY (*, dim)` adds `dim` to them. The skill presented the fixed form as complete on its own, so a metric built from it returned one row per `dim` value where a per-group value was intended.
+
 ## [1.3.4] - 2026-08-12
 
 ### Added
