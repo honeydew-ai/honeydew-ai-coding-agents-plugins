@@ -2,6 +2,18 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.7] - 2026-08-14
+
+### Added
+
+- **`entity-creation` hands off to `relation-creation` once an entity validates** — new entities, especially a batch from `import_tables`, used to land with their foreign keys exposed but nothing joined, and nothing in the skill said to connect them. It now ends by invoking the relation skill instead of stopping at validation.
+- **`relation-creation` finds its own candidates** — it assumed you already knew which two entities to join. It now searches both sides of a new entity, junction tables and effective-dated shapes with no key pair at all, and documents many-to-many (a bridge kept as its own entity with two `many-to-one` relations) and role playing (a copy of the entity per role, rather than one shared dimension).
+- **Non-trivial joins need the user's word before they are built** — SCD Type 2, range joins, multiple paths between two entities and role playing are all easy to infer confidently and get wrong, and the developer knows things about the schema that are not visible in it. `relation-creation` now says to propose and ask rather than build a chain of inferred relations in one pass.
+
+### Fixed
+
+- **Honeydew object writes are now gated on every skill that governs them** — a relation lives inside its source entity's YAML, and the hook stopped at the first match, so those writes always resolved to `entity-creation` and `relation-creation` could never be required. Payloads matching more than one skill now name them all in a single prompt.
+
 ## [1.3.6] - 2026-08-14
 
 ### Changed

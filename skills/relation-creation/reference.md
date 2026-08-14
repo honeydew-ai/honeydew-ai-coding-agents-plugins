@@ -26,6 +26,8 @@ relations:
 
 > Always define the relation on the entity that holds the foreign key, using `many-to-one`.
 
+There is no many-to-many `rel_type`. A many-to-many link is expressed as the bridge (junction) table kept as its own entity at the grain of one row per pair, with **two** `many-to-one` relations — one to each side — in that entity's YAML. See the bridge example in [examples.md](examples.md).
+
 ## Join Type (rel_join_type)
 
 | Value | Behaviour | Default |

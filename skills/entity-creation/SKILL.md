@@ -20,7 +20,8 @@ When creating an entity you are answering three questions:
 3. **What columns should be exposed?** — the initial attribute mapping from source columns
 
 > This skill focuses on the entity shell: source, key, and attribute mapping.
-> Use `attribute-creation` to add calculated attributes and `relation-creation` to wire up joins afterwards.
+> Use `attribute-creation` to add calculated attributes and `relation-creation` to wire up joins afterwards —
+> see [After Validating: Hand Off to relation-creation](#after-validating-hand-off-to-relation-creation).
 
 ---
 
@@ -79,6 +80,9 @@ Need to create an entity?
     └─► Updating an existing entity or dataset?
             └─► Use update_object with YAML + object_key
                 (preserve existing field order — minimal diff)
+
+Entity written?
+    └─► Validate it, then hand off to relation-creation for joins
 ```
 
 ---
@@ -133,6 +137,16 @@ Search for topics like: "entities", "source types", "granularity", "time spine",
 
 ---
 
+## Common Pitfalls to Avoid
+
+- **Non-unique or nullable keys.** Honeydew assumes keys are unique and non-null. Duplicates cause silent incorrect join results. Validate before modeling.
+- **Using custom SQL when a physical table would do.** Custom SQL blocks filter pushdown. Use a domain-level filter instead and keep the entity on the physical table.
+- **Skipping the key column in the attribute list.** The key column must be in the dataset attributes list or Honeydew cannot resolve it.
+- **Composite keys on virtual entities.** Use `HASH()` to create a single synthetic key attribute instead.
+- **Forgetting `is_time_spine` on your date dimension.** Time-aware metrics will not function without a designated time spine entity.
+
+---
+
 ## MANDATORY: Validate After Creating
 
 **After creating ANY entity, you MUST invoke the `validation` skill to test and validate.**
@@ -153,10 +167,10 @@ See `validation` skill for:
 
 ---
 
-## Common Pitfalls to Avoid
+## After Validating: Hand Off to relation-creation
 
-- **Non-unique or nullable keys.** Honeydew assumes keys are unique and non-null. Duplicates cause silent incorrect join results. Validate before modeling.
-- **Using custom SQL when a physical table would do.** Custom SQL blocks filter pushdown. Use a domain-level filter instead and keep the entity on the physical table.
-- **Skipping the key column in the attribute list.** The key column must be in the dataset attributes list or Honeydew cannot resolve it.
-- **Composite keys on virtual entities.** Use `HASH()` to create a single synthetic key attribute instead.
-- **Forgetting `is_time_spine` on your date dimension.** Time-aware metrics will not function without a designated time spine entity.
+A validated entity is not yet reachable from the rest of the model: nothing joins to it, so no metric can cross into it and no filter propagates. `import_tables` is the sharp case, landing a batch of entities whose FK columns are mapped as attributes and connected to nothing.
+
+**Once the entity has validated, invoke the `relation-creation` skill** to find the candidate joins and propose them. That skill owns the search, the modeling choices and the write; it will come back here if a junction table or a role-playing copy has to be created as an entity first.
+
+Skip this only when the user declined relations, or when the entity is deliberately standalone (a config lookup, a static parameter table). Do not write a `relations:` block from here to save the round trip — every rule about which side holds it, and about `update_object` replacing the whole block, lives in `relation-creation`.
