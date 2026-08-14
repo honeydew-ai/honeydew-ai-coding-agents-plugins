@@ -21,7 +21,7 @@ When creating an entity you are answering three questions:
 
 > This skill focuses on the entity shell: source, key, and attribute mapping.
 > Use `attribute-creation` to add calculated attributes and `relation-creation` to wire up joins afterwards —
-> see [After Validating: Propose Relations](#after-validating-propose-relations) for the handoff.
+> see [After Validating: Hand Off to relation-creation](#after-validating-hand-off-to-relation-creation).
 
 ---
 
@@ -82,7 +82,7 @@ Need to create an entity?
                 (preserve existing field order — minimal diff)
 
 Entity written?
-    └─► Validate it, then propose relations and hand off to relation-creation
+    └─► Validate it, then hand off to relation-creation for joins
 ```
 
 ---
@@ -167,22 +167,10 @@ See `validation` skill for:
 
 ---
 
-## After Validating: Propose Relations
+## After Validating: Hand Off to relation-creation
 
-Once the entity has validated, close the loop on relations. Skip this section if the user declined them; if they already named the joins they want, go straight to the `relation-creation` skill.
+A validated entity is not yet reachable from the rest of the model: nothing joins to it, so no metric can cross into it and no filter propagates. `import_tables` is the sharp case, landing a batch of entities whose FK columns are mapped as attributes and connected to nothing.
 
-1. **Read what already exists.** Call `get_entity` on each new entity. `create_entity` YAML can carry a `relations:` block, so some joins may already be defined — never propose one that is already there.
-2. **Look for candidates in both directions.** A relation is defined on the entity that holds the foreign key, and that entity may be either side of a new import:
-   - **New entity is the many side** — an FK column among its attributes points at an existing entity's key.
-   - **New entity is the one side** — an existing entity holds an FK matching the new entity's key. This is the usual shape when importing a dimension into a model that already has facts, and it is invisible if you only scan the new entity.
-   - **Between new entities** — when several tables arrive from one `import_tables` call, check the batch against itself.
-   - **Through a bridge table** — two entities with no FK between them are often connected many-to-many by a junction table holding an FK to each side, so check whether a third entity points at both before calling them unrelated. The junction table often exists in the warehouse without being an entity yet: create it here, validate it, then relate it.
-   - **With no key pair at all** — a missing FK is not proof of independence. Weigh the entity's grain and its date columns too; these become expression-based joins, and `relation-creation` owns the SQL.
+**Once the entity has validated, invoke the `relation-creation` skill** to find the candidate joins and propose them. That skill owns the search, the modeling choices and the write; it will come back here if a junction table or a role-playing copy has to be created as an entity first.
 
-   Confirm the one side actually has a key — an `import_tables` entity may arrive with none, and validation checks key uniqueness, not key presence. Set the key before relating to it.
-
-   Search for the FK with `search_model` in `OR` mode, since an attribute is often renamed from the column it maps to and `EXACT` matches the attribute name only; narrow a large model with `entity.field` syntax (`orders.` returns every field of matching entities).
-3. **Check for unmapped FKs.** If a new entity yields no candidates, run `get_table_info` on its source table — the FK may exist in the warehouse but never have been exposed as an attribute. Offer to map it (see Best Practices).
-4. **Ask which to create.** Present each candidate — source (many side) → target (one side) and the FK/PK column pair, or the condition you believe links them when there is no pair — and ask the user which they want, naming a bridge as one proposal covering both sides. Never create a relation off an inferred FK silently.
-5. **Hand off.** Invoke the `relation-creation` skill for the confirmed relations.
-6. **Report an empty result once.** If nothing surfaces, say so in one line. Ask whether the entity should join something only when the model holds entities it plausibly relates to; a deliberately standalone entity (a config lookup, a static parameter table) needs no prompt. Do not invent joins to fill the gap.
+Skip this only when the user declined relations, or when the entity is deliberately standalone (a config lookup, a static parameter table). Do not write a `relations:` block from here to save the round trip — every rule about which side holds it, and about `update_object` replacing the whole block, lives in `relation-creation`.
