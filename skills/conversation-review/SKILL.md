@@ -121,7 +121,7 @@ For each item, record:
 | Type | Tool(s) |
 |---|---|
 | Add metric | `create_object` with metric YAML |
-| Add attribute | `create_object` with attribute YAML |
+| Add calculated attribute | `create_object` with calculated attribute YAML |
 | Fix calculation | `get_field` to read current YAML → `update_object` with corrected SQL |
 | Improve metadata | `get_entity` or `get_field` → `update_object` with improved `description` or `display_name` |
 | Add instruction | `create_context_item` with `subtype: instruction` |
@@ -164,7 +164,7 @@ Never apply changes directly to `prod`.
 For each semantic layer action item, apply in this order to avoid dependency issues:
 
 1. **New entities** (if any) — `create_entity`
-2. **New attributes** — `create_object` with attribute YAML
+2. **New calculated attributes** — `create_object` with calculated attribute YAML
 3. **New metrics** — `create_object` with metric YAML
 4. **Updated calculations or metadata** — `update_object`
 
@@ -224,7 +224,7 @@ Build action item list → review with user
     ▼
 create_workspace_branch (or switch to existing dev branch)
     │
-    ├── Semantic layer: create_object / update_object (entities, attributes, metrics)
+    ├── Semantic layer: create_object / update_object (entities, calculated attributes, metrics)
     ├── Context layer: create_context_item / update_context_item
     └── Agents: update_agent
     │

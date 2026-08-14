@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.6] - 2026-08-14
+
+### Changed
+
+- **The `create_object` attribute type is named "calculated attribute"** — the conversation-review skill called it plain "attribute" where the YAML literal is `calculated_attribute`, matching the wording now used in the Honeydew docs. Wording only; no change to the YAML or tool parameters.
+
 ## [1.3.5] - 2026-08-13
 
 ### Changed
