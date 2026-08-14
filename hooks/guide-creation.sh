@@ -5,6 +5,13 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
 hd_read_input
 
+# A relations: key that actually opens a block, as opposed to the word appearing
+# in a description or an empty relations: [] carried through a round trip. The
+# key must start its line and be followed by a list item, because the payloads
+# this has to tell apart differ only in that: "relations:\n  - name: customers"
+# is relation work, "relations: []" on an entity that has none is not.
+rels_re='(^|\n)[ \t]*relations:[ \t]*(\n[ \t]*-|\[[ \t]*\{)'
+
 skill_hints=""
 
 case "$tool_name" in
@@ -15,53 +22,81 @@ case "$tool_name" in
     skill_hints="honeydew-ai:entity-creation"
     ;;
   *create_entity*)
-    skill_hints="honeydew-ai:entity-creation"
+    # entity_yaml, not yaml_text -- and it may carry relations inline, which is
+    # the same both-skills payload the create_object branch handles below.
+    # Falls back to the entity skill alone if the payload will not parse.
+    skill_hints=$(printf '%s' "$hd_input" | jq -r --arg re "$rels_re" '
+      ["honeydew-ai:entity-creation"]
+      + (if ((.tool_input.entity_yaml // "") | test($re))
+         then ["honeydew-ai:relation-creation"] else [] end)
+      | .[]' 2>/dev/null) || skill_hints=""
+    [ -n "$skill_hints" ] || skill_hints="honeydew-ai:entity-creation"
     ;;
   *create_object*|*update_object*)
     # Detect object type by searching yaml_text with jq (avoids newline issues).
     #
-    # Every match is emitted, one skill per line, rather than the first hit
-    # winning. A relation is not a standalone object -- it lives inside its
-    # source entity's YAML -- so a relation write is always also an entity
-    # write, and the two skills govern different halves of it: entity-creation
-    # the source and key, relation-creation the join and the rule that
-    # rewriting the relations: block drops whatever it omits. An if/elif chain
-    # had to order those two, and testing type: entity first made the
-    # relation-creation branch unreachable for every payload the
-    # relation-creation skill documents.
-    skill_hints=$(printf '%s' "$hd_input" | jq -r '
+    # One type wins, as before -- a metric is not an entity, and testing every
+    # branch unconditionally made any YAML that merely contained the word
+    # relations: demand the relation skill. The entity branch is the exception:
+    # a relation is not a standalone object, it lives inside its source
+    # entity's YAML, so that one payload is governed by two skills at once and
+    # emits both. entity-creation covers the source and key, relation-creation
+    # the join and the rule that rewriting a relations: block drops whatever it
+    # omits. An if/elif chain could only ever name one of them, and testing
+    # type: entity first made the relation branch unreachable for every payload
+    # the relation-creation skill documents.
+    skill_hints=$(printf '%s' "$hd_input" | jq -r --arg re "$rels_re" '
       (.tool_input.yaml_text // "") as $y
-      | [ (if ($y | test("type:\\s*metric"))    then "honeydew-ai:metric-creation"    else empty end),
-          (if ($y | test("type:\\s*attribute")) then "honeydew-ai:attribute-creation" else empty end),
-          (if ($y | test("type:\\s*domain"))    then "honeydew-ai:domain-creation"    else empty end),
-          (if ($y | test("type:\\s*entity"))    then "honeydew-ai:entity-creation"    else empty end),
-          (if ($y | test("relations:"))         then "honeydew-ai:relation-creation"  else empty end) ]
+      | if   ($y | test("type:\\s*metric"))    then ["honeydew-ai:metric-creation"]
+        elif ($y | test("type:\\s*attribute")) then ["honeydew-ai:attribute-creation"]
+        elif ($y | test("type:\\s*domain"))    then ["honeydew-ai:domain-creation"]
+        elif ($y | test("type:\\s*entity"))
+          then ["honeydew-ai:entity-creation"]
+               + (if ($y | test($re)) then ["honeydew-ai:relation-creation"] else [] end)
+        elif ($y | test($re))                  then ["honeydew-ai:relation-creation"]
+        else [] end
       | .[]' 2>/dev/null || true)
     ;;
 esac
 
-if [ -n "$skill_hints" ]; then
-  # Check every hinted skill before deciding, so a payload governed by two
-  # skills produces one deny naming both rather than a deny per retry. Each
-  # hd_should_block call claims its own per-skill marker, keeping the
-  # at-most-one-deny-per-(session, skill) bound intact.
-  missing=""
-  while IFS= read -r hint; do
-    [ -n "$hint" ] || continue
-    if hd_should_block "$session_id" "$transcript" "$hint"; then
-      missing="${missing:+$missing }$hint"
-    fi
-  done <<< "$skill_hints"
+hints=()
+while IFS= read -r hint; do
+  [ -n "$hint" ] || continue
+  # Never block on a skill the model has no way to load.
+  hd_skill_available "$hint" || continue
+  hints+=("$hint")
+done <<< "$skill_hints"
 
-  [ -n "$missing" ] || exit 0
+if [ ${#hints[@]} -gt 0 ]; then
+  # One marker per (session, payload shape), claimed before anything reads the
+  # transcript. Two properties depend on claiming it here rather than per skill:
+  #
+  #   * A batch of parallel tool calls has exactly one winner, so a two-skill
+  #     payload produces one deny naming both. Racing per-skill markers split
+  #     that into two denies of half the answer each.
+  #   * The transcript scan stays behind the cheap check, once per shape, not
+  #     once per skill per call.
+  #
+  # The bound is therefore at most one deny per (session, shape) rather than per
+  # (session, skill): a session can be blocked once for an entity write and once
+  # for an entity-with-relations write. Both name what to load, and both are
+  # bounded by the handful of payload shapes that exist.
+  key="creation"
+  for hint in "${hints[@]}"; do key="$key+${hint#*:}"; done
+  hd_first_time "$session_id" "$transcript" "$key" || exit 0
 
-  set -- $missing
-  if [ $# -gt 1 ]; then
+  missing=()
+  for hint in "${hints[@]}"; do
+    hd_skill_loaded "$transcript" "$hint" || missing+=("$hint")
+  done
+  [ ${#missing[@]} -gt 0 ] || exit 0
+
+  if [ ${#missing[@]} -gt 1 ]; then
     subject="skills, which are"; covers="They cover"; without="them"
   else
     subject="skill, which is"; covers="The skill covers"; without="it"
   fi
-  hd_deny "Creating or modifying this Honeydew object needs the $(hd_quote_list "$@") $subject not loaded in this session. $covers required fields, naming conventions and correct YAML structure, and writing the object without $without risks a malformed definition. $(hd_retry_note "$@") After the object is created, run the 'honeydew-ai:validation' skill to verify it works."
+  hd_deny "Creating or modifying this Honeydew object needs the $(hd_quote_list "${missing[@]}") $subject not loaded in this session. $covers required fields, naming conventions and correct YAML structure, and writing the object without $without risks a malformed definition. $(hd_retry_note "${missing[@]}") After the object is created, run the 'honeydew-ai:validation' skill to verify it works."
 else
   # No detected type means no specific skill to require. Blocking on an
   # unrecognised payload would stop work over a guess, so this path stays

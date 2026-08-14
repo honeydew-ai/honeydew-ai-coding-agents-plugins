@@ -156,7 +156,7 @@ See `validation` skill for:
 
 ## After Validating: Propose Relations
 
-Relations are what make a new entity reachable from the rest of the model — without them no metric can cross into it and filters do not propagate. `import_tables` is the sharp case: it lands several entities at once with their foreign key columns mapped as attributes and nothing connected. Once validation passes, close the loop.
+Once the entity has validated — not before — close the loop on relations. Relations are what make a new entity reachable from the rest of the model: without them no metric can cross into it and filters do not propagate. `import_tables` is the sharp case, landing several entities at once with their foreign key columns mapped as attributes and nothing connected.
 
 Skip this section if the user declined relations. If they already named the joins they want, go straight to the `relation-creation` skill.
 
@@ -167,7 +167,7 @@ Skip this section if the user declined relations. If they already named the join
    - **Between new entities** — when several tables arrive from one `import_tables` call, check the batch against itself.
    - **Through a bridge table** — two entities with no FK between them are often connected many-to-many by a junction table carrying an FK to each side. The bridge may be one of the new entities, or one already in the model. Before concluding two entities are unrelated, check whether a third entity holds FKs to both.
 
-   Search by FK column name with `search_model` (`search_mode: EXACT`) rather than fetching every entity; on a large model, scope the sweep to the same database and schema. See [Discovery Helpers](#discovery-helpers) for the tools.
+   Search for the FK with `search_model` in `OR` mode rather than fetching every entity: an attribute is often renamed from the column it maps to, and `EXACT` matches the attribute name only. `search_model` has no warehouse scoping, so narrow a large model with its `entity.field` syntax (`orders.` returns every field of matching entities) and spend `get_entity` on the candidates that survive. See [Discovery Helpers](#discovery-helpers) for the tools.
 
    A bridge table is modeled as an entity, not as a single relation — `rel_type` has no many-to-many form. Keep it as its own entity at the grain of one row per pair (its key is usually the composite of both FKs, so the composite-key rules in [reference.md](reference.md) apply) and give it **two** `many-to-one` relations, one to each side. Both live in the bridge entity's own YAML, so they are a single `update_object`.
 3. **Check for unmapped FKs.** If a new entity yields no candidates, run `get_table_info` on its source table — the FK may exist in the warehouse but never have been exposed as an attribute. Offer to map it (see Best Practices).
