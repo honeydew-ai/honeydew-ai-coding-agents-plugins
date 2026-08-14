@@ -79,6 +79,8 @@ Need to define a relation?
 
 See [examples.md](examples.md) for full worked examples covering: field-based join, composite key, expression-based (SCD Type 2), multiple relations, many-to-many through a bridge table, and removing a relation.
 
+For any shape these do not cover, search the Honeydew documentation with `search_docs` and `query_docs_filesystem` before improvising — it carries more relationship-modeling detail than this skill does. See [Documentation Lookup](#documentation-lookup) for what to search for.
+
 ---
 
 ## Discovery Helpers
@@ -97,12 +99,12 @@ See [reference.md](reference.md) for: YAML schema, relation direction (rel_type)
 
 ## Finding Candidate Relations
 
-When you arrive from `entity-creation` with a freshly validated entity, or a batch of them from `import_tables`, nothing is connected yet and there is no list of joins to work from. Build one:
+When you arrive from the `entity-creation` skill with a freshly validated entity, or a batch of them from `import_tables`, nothing is connected yet and there is no list of joins to work from. Build one:
 
 - **The new entity is the many side** — an FK column among its attributes points at an existing entity's key.
 - **The new entity is the one side** — an existing entity holds an FK matching the new entity's key. This is the usual shape when a dimension is imported into a model that already has facts, and it is invisible if you only scan the new entity.
 - **Between new entities** — when several tables arrive together, check the batch against itself.
-- **Through a bridge table** — a junction table holding an FK to each side connects two entities that share no FK, so check whether a third entity points at both before calling them unrelated. If the junction table is not an entity yet, create it with `entity-creation` and validate it first.
+- **Through a bridge table** — a junction table holding an FK to each side connects two entities that share no FK, so check whether a third entity points at both before calling them unrelated. If the junction table is not an entity yet, create it with the `entity-creation` skill and validate it first.
 - **With no key pair at all** — a missing FK is not proof of independence. Weigh the entity's grain and its date columns; if you find an effective-dated dimension, a range join or a similar shape, it may need an expression-based connection.
 
 Confirm the one side actually has a key — an `import_tables` entity may arrive with none, and validation checks key uniqueness, not key presence. Set the key before relating to it.
@@ -114,7 +116,7 @@ Search for the FK with `search_model` in `OR` mode, since an attribute is often 
 One entity often connects to a fact more than once in different roles — a `users` entity that is the salesperson on one relation, the support agent on another. Those roles are not the same thing, and a single shared entity makes them look like one.
 
 - **Conformed dimension** — the same business concept meaning the same thing everywhere (one `customers` entity used by orders and by tickets). Relate all of them to the one entity.
-- **Role playing** — the same table standing in for different concepts, distinguished only by which FK reaches it. Create a copy of the entity per role with `entity-creation` (`sales_reps`, `support_agents`) and give each its own relation, so each role carries its own name, filters and metrics.
+- **Role playing** — the same table standing in for different concepts, distinguished only by which FK reaches it. Create a copy of the entity per role with the `entity-creation` skill (`sales_reps`, `support_agents`) and give each its own relation, so each role carries its own name, filters and metrics.
 
 The tell is whether the two paths would ever be filtered or reported on together as one population. If not, it is role playing.
 
