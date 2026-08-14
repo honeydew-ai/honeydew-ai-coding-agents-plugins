@@ -164,7 +164,7 @@ Never apply changes directly to `prod`.
 For each semantic layer action item, apply in this order to avoid dependency issues:
 
 1. **New entities** (if any) — `create_entity`
-2. **New attributes** — `create_object` with calculated attribute YAML
+2. **New calculated attributes** — `create_object` with calculated attribute YAML
 3. **New metrics** — `create_object` with metric YAML
 4. **Updated calculations or metadata** — `update_object`
 
