@@ -77,7 +77,7 @@ Need to define a relation?
 
 ## Examples
 
-See [examples.md](examples.md) for full worked examples covering: field-based join, composite key, expression-based (SCD Type 2), multiple relations, and removing a relation.
+See [examples.md](examples.md) for full worked examples covering: field-based join, composite key, expression-based (SCD Type 2), multiple relations, many-to-many through a bridge table, and removing a relation.
 
 ---
 

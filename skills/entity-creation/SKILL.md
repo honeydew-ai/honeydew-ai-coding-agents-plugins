@@ -80,6 +80,9 @@ Need to create an entity?
     └─► Updating an existing entity or dataset?
             └─► Use update_object with YAML + object_key
                 (preserve existing field order — minimal diff)
+
+Entity written?
+    └─► Validate it, then propose relations and hand off to relation-creation
 ```
 
 ---
@@ -134,6 +137,16 @@ Search for topics like: "entities", "source types", "granularity", "time spine",
 
 ---
 
+## Common Pitfalls to Avoid
+
+- **Non-unique or nullable keys.** Honeydew assumes keys are unique and non-null. Duplicates cause silent incorrect join results. Validate before modeling.
+- **Using custom SQL when a physical table would do.** Custom SQL blocks filter pushdown. Use a domain-level filter instead and keep the entity on the physical table.
+- **Skipping the key column in the attribute list.** The key column must be in the dataset attributes list or Honeydew cannot resolve it.
+- **Composite keys on virtual entities.** Use `HASH()` to create a single synthetic key attribute instead.
+- **Forgetting `is_time_spine` on your date dimension.** Time-aware metrics will not function without a designated time spine entity.
+
+---
+
 ## MANDATORY: Validate After Creating
 
 **After creating ANY entity, you MUST invoke the `validation` skill to test and validate.**
@@ -156,32 +169,20 @@ See `validation` skill for:
 
 ## After Validating: Propose Relations
 
-Once the entity has validated — not before — close the loop on relations. Relations are what make a new entity reachable from the rest of the model: without them no metric can cross into it and filters do not propagate. `import_tables` is the sharp case, landing several entities at once with their foreign key columns mapped as attributes and nothing connected.
-
-Skip this section if the user declined relations. If they already named the joins they want, go straight to the `relation-creation` skill.
+Once the entity has validated, close the loop on relations. Skip this section if the user declined them; if they already named the joins they want, go straight to the `relation-creation` skill.
 
 1. **Read what already exists.** Call `get_entity` on each new entity. `create_entity` YAML can carry a `relations:` block, so some joins may already be defined — never propose one that is already there.
-2. **Look for candidates in both directions.** A relation lives on the many side — usually the entity holding the foreign key, and that entity may be either side of a new import:
+2. **Look for candidates in both directions.** A relation is defined on the entity that holds the foreign key, and that entity may be either side of a new import:
    - **New entity is the many side** — an FK column among its attributes points at an existing entity's key.
    - **New entity is the one side** — an existing entity holds an FK matching the new entity's key. This is the usual shape when importing a dimension into a model that already has facts, and it is invisible if you only scan the new entity.
    - **Between new entities** — when several tables arrive from one `import_tables` call, check the batch against itself.
-   - **Through a bridge table** — two entities with no FK between them are often connected many-to-many by a junction table carrying an FK to each side. The bridge may be one of the new entities, or one already in the model. Before concluding two entities are unrelated, check whether a third entity holds FKs to both.
-   - **With no key pair at all** — some joins have no equality to find: an effective-dated dimension matched on a date falling inside a validity range (SCD Type 2), a fact joined to the time spine by range, a key that matches only after a transform. A missing FK is not proof of independence, so weigh the entity's grain and its date columns too. These become expression-based joins; `relation-creation` owns the SQL.
+   - **Through a bridge table** — two entities with no FK between them are often connected many-to-many by a junction table holding an FK to each side, so check whether a third entity points at both before calling them unrelated. The junction table often exists in the warehouse without being an entity yet: create it here, validate it, then relate it.
+   - **With no key pair at all** — a missing FK is not proof of independence. Weigh the entity's grain and its date columns too; these become expression-based joins, and `relation-creation` owns the SQL.
 
-   Search for the FK with `search_model` in `OR` mode rather than fetching every entity: an attribute is often renamed from the column it maps to, and `EXACT` matches the attribute name only. `search_model` has no warehouse scoping, so narrow a large model with its `entity.field` syntax (`orders.` returns every field of matching entities) and spend `get_entity` on the candidates that survive. See [Discovery Helpers](#discovery-helpers) for the tools.
+   Confirm the one side actually has a key — an `import_tables` entity may arrive with none, and validation checks key uniqueness, not key presence. Set the key before relating to it.
 
-   A bridge table is modeled as an entity, not as a single relation — `rel_type` has no many-to-many form. Keep it as its own entity at the grain of one row per pair (its key is usually the composite of both FKs, so the composite-key rules in [reference.md](reference.md) apply) and give it **two** `many-to-one` relations, one to each side. Both live in the bridge entity's own YAML, so they are a single `update_object`.
+   Search for the FK with `search_model` in `OR` mode, since an attribute is often renamed from the column it maps to and `EXACT` matches the attribute name only; narrow a large model with `entity.field` syntax (`orders.` returns every field of matching entities).
 3. **Check for unmapped FKs.** If a new entity yields no candidates, run `get_table_info` on its source table — the FK may exist in the warehouse but never have been exposed as an attribute. Offer to map it (see Best Practices).
-4. **Ask which to create.** Present each candidate — source (many side) → target (one side) and the FK/PK column pair, or the condition you believe links them when there is no pair — and ask the user which they want. Present a bridge as one proposal naming both sides, not as two unrelated halves — half a bridge connects nothing. Never create a relation off an inferred FK silently. This decides *which* pairs to connect; *how* to connect them (join type, direction, cross-filtering) is `relation-creation`'s own pre-implementation step.
-5. **Hand off, batched by source entity.** Invoke the `relation-creation` skill for the confirmed relations. `update_object` replaces an entity's entire `relations:` block, so every relation for one source entity — including any it already had — must go in a single call. Creating them one at a time deletes the previous one each time.
+4. **Ask which to create.** Present each candidate — source (many side) → target (one side) and the FK/PK column pair, or the condition you believe links them when there is no pair — and ask the user which they want, naming a bridge as one proposal covering both sides. Never create a relation off an inferred FK silently.
+5. **Hand off.** Invoke the `relation-creation` skill for the confirmed relations.
 6. **Report an empty result once.** If nothing surfaces, say so in one line. Ask whether the entity should join something only when the model holds entities it plausibly relates to; a deliberately standalone entity (a config lookup, a static parameter table) needs no prompt. Do not invent joins to fill the gap.
-
----
-
-## Common Pitfalls to Avoid
-
-- **Non-unique or nullable keys.** Honeydew assumes keys are unique and non-null. Duplicates cause silent incorrect join results. Validate before modeling.
-- **Using custom SQL when a physical table would do.** Custom SQL blocks filter pushdown. Use a domain-level filter instead and keep the entity on the physical table.
-- **Skipping the key column in the attribute list.** The key column must be in the dataset attributes list or Honeydew cannot resolve it.
-- **Composite keys on virtual entities.** Use `HASH()` to create a single synthetic key attribute instead.
-- **Forgetting `is_time_spine` on your date dimension.** Time-aware metrics will not function without a designated time spine entity.

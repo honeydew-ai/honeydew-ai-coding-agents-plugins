@@ -9,8 +9,9 @@ hd_read_input
 # in a description or an empty relations: [] carried through a round trip. The
 # key must start its line and be followed by a list item, because the payloads
 # this has to tell apart differ only in that: "relations:\n  - name: customers"
-# is relation work, "relations: []" on an entity that has none is not.
-rels_re='(^|\n)[ \t]*relations:[ \t]*(\n[ \t]*-|\[[ \t]*\{)'
+# is relation work, "relations: []" on an entity that has none is not. A trailing
+# comment and a blank line before the first item both stay relation work.
+rels_re='(^|\n)[ \t]*relations:[ \t]*(#[^\n]*)?(\n([ \t]*\n)?[ \t]*-|\[[ \t]*\{)'
 
 skill_hints=""
 

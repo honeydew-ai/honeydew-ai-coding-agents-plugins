@@ -16,7 +16,6 @@ keys:
   - <key_attribute_name>
 key_dataset: <source_dataset_name>
 is_time_spine: false
-relations: [] # optional - joins to other entities, see the relation-creation skill
 ```
 
 A relation is not a standalone object: it lives in the `relations:` block of the entity that holds the foreign key. The block is therefore part of the entity YAML on every write, and an update that omits it deletes the relations it omits. See the `relation-creation` skill for the block's own schema.

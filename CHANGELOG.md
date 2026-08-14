@@ -7,6 +7,7 @@ All notable changes to the Honeydew AI Plugins for Coding Agents are documented 
 ### Added
 
 - **`entity-creation` hands off to `relation-creation` once an entity validates** — new entities, especially a batch from `import_tables`, used to land with their foreign keys exposed but nothing joined. The skill now looks for FK candidates on either side of the new entity, including many-to-many links through a bridge table, and asks which relations to create rather than leaving the entities unconnected.
+- **`relation-creation` covers many-to-many** — the skill documented no way to express one, though `rel_type` offers only `many-to-one` and `one-to-many`. A bridge table is now a worked example: keep the junction table as its own entity at one row per pair and give it two `many-to-one` relations in a single update.
 
 ### Fixed
 
