@@ -172,8 +172,30 @@ hd_emit() {
   }'
 }
 
-# hd_retry_note <skill> -- shared tail: say the block is one-shot, so a model
-# that cannot load the skill does not conclude Honeydew is unavailable.
+# hd_quote_list <item>... -- "'a'" / "'a' and 'b'" / "'a', 'b' and 'c'"
+hd_quote_list() {
+  local out=""
+  while [ $# -gt 0 ]; do
+    if [ -z "$out" ]; then
+      out="'$1'"
+    elif [ $# -eq 1 ]; then
+      out="$out and '$1'"
+    else
+      out="$out, '$1'"
+    fi
+    shift
+  done
+  printf '%s' "$out"
+}
+
+# hd_retry_note <skill>... -- shared tail: say the block is one-shot, so a model
+# that cannot load the skill does not conclude Honeydew is unavailable. Takes
+# more than one skill because a single payload can need more than one: relations
+# live inside entity YAML, so one write is governed by two skills.
 hd_retry_note() {
-  printf "Load the '%s' skill -- the Skill tool on Claude Code, its SKILL.md on Codex -- then repeat this call. This check blocks a call only once per session, so the retry will go through either way." "$1"
+  local list noun theirs
+  list="$(hd_quote_list "$@")"
+  noun="skill"; theirs="its"
+  if [ $# -gt 1 ]; then noun="skills"; theirs="their"; fi
+  printf "Load the %s %s -- the Skill tool on Claude Code, %s SKILL.md on Codex -- then repeat this call. This check blocks a call only once per session, so the retry will go through either way." "$list" "$noun" "$theirs"
 }

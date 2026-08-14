@@ -89,7 +89,7 @@ Steps 2–4 are the hand-maintained registrations; `./scripts/validate-skills.sh
 - Field references always use `entity.field_name` (fully qualified)
 - YAML object names use `snake_case`; display names use Title Case
 - Cross-reference other skills by name in backticks (e.g., "see the **filtering** skill")
-- Creation skills must end with a "MANDATORY: Validate After Creating" section pointing to the `validation` skill
+- Creation skills must carry a "MANDATORY: Validate After Creating" section pointing to the `validation` skill, placed after Best Practices. Reference material may follow it — every creation skill but `domain-creation` ends on Common Pitfalls — but nothing after it may compete with validation as the step to take next.
 - After `create_object`/`update_object`, always display the `ui_url` from the response
 
 ## .claude-plugin vs .cursor-plugin vs .github/plugin vs .codex-plugin
