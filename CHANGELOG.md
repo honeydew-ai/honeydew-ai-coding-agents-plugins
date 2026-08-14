@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.7] - 2026-08-14
+
+### Added
+
+- **`entity-creation` hands off to `relation-creation` once an entity validates** — new entities, especially a batch from `import_tables`, used to land with their foreign keys exposed but nothing joined. The skill now looks for FK candidates against the existing model and asks which relations to create, rather than leaving the entities unconnected or inventing joins on its own.
+
 ## [1.3.6] - 2026-08-14
 
 ### Changed

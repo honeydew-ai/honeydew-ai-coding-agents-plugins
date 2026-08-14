@@ -20,7 +20,8 @@ When creating an entity you are answering three questions:
 3. **What columns should be exposed?** — the initial attribute mapping from source columns
 
 > This skill focuses on the entity shell: source, key, and attribute mapping.
-> Use `attribute-creation` to add calculated attributes and `relation-creation` to wire up joins afterwards.
+> Use `attribute-creation` to add calculated attributes and `relation-creation` to wire up joins afterwards —
+> see [After Validating: Propose Relations](#after-validating-propose-relations) for the handoff.
 
 ---
 
@@ -150,6 +151,20 @@ See `validation` skill for:
 2. Verify data flows using `get_data_from_fields` with:
 
 - `metrics`: `["<entity>.count"]`
+
+---
+
+## After Validating: Propose Relations
+
+A newly created entity is unjoined. `import_tables` in particular can land several entities at once with their foreign key columns exposed as attributes but nothing connected, so metrics cannot reach across them and filters do not propagate. **Do not end the task at validation — close the loop on relations.**
+
+Steps, after validation succeeds:
+
+1. **Honor what the user already said.** If they named the joins they want, go straight to the `relation-creation` skill. If they said not to create relations, stop here.
+2. **Look for candidates.** Scan the new entities' attributes for foreign key columns and match them against the keys of entities already in the model (`list_entities`, `get_entity`, `search_model`). When several tables were imported together, also check for FKs pointing between the new entities themselves.
+3. **Ask before creating.** Present the candidates you found — source (many side) → target (one side), the FK/PK column pair, and how confident you are it is a real relation — and ask the user which to create. Never create relations silently off an inferred FK.
+4. **Hand off.** For each confirmed relation, invoke the `relation-creation` skill; it covers join type, direction, cross-filtering, and its own pre-implementation options step.
+5. **Say so when there is nothing.** If no FK candidates surface, tell the user in one line that the entity stands alone and ask whether it should join anything. Do not invent joins to fill the gap.
 
 ---
 
