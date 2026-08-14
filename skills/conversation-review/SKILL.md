@@ -121,7 +121,7 @@ For each item, record:
 | Type | Tool(s) |
 |---|---|
 | Add metric | `create_object` with metric YAML |
-| Add attribute | `create_object` with calculated attribute YAML |
+| Add calculated attribute | `create_object` with calculated attribute YAML |
 | Fix calculation | `get_field` to read current YAML → `update_object` with corrected SQL |
 | Improve metadata | `get_entity` or `get_field` → `update_object` with improved `description` or `display_name` |
 | Add instruction | `create_context_item` with `subtype: instruction` |
