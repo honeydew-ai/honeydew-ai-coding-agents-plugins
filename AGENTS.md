@@ -89,7 +89,7 @@ Steps 2–4 are the hand-maintained registrations; `./scripts/validate-skills.sh
 - Field references always use `entity.field_name` (fully qualified)
 - YAML object names use `snake_case`; display names use Title Case
 - Cross-reference other skills by name in backticks (e.g., "see the **filtering** skill")
-- Skills that create semantic-layer objects (metric, attribute, entity, relation, domain) must carry a "MANDATORY: Validate After Creating" section pointing to the `validation` skill, placed after Best Practices and before any follow-up step. `context-item-creation` writes no semantic object and closes on its own MANDATORY section instead.
+- Skills that create semantic-layer objects (metric, calculated attribute, entity, relation, domain) must carry a "MANDATORY: Validate After Creating" section pointing to the `validation` skill, placed after Best Practices and before any follow-up step. `context-item-creation` writes no semantic object and closes on its own MANDATORY section instead.
 - Sections may follow it: reference material like Common Pitfalls, or a handoff to another creation skill. A handoff must say in its heading and opening line that it runs only once validation has passed, so validation stays the next action after a write.
 - After `create_object`/`update_object`, always display the `ui_url` from the response
 
