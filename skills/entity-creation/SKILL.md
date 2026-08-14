@@ -156,15 +156,21 @@ See `validation` skill for:
 
 ## After Validating: Propose Relations
 
-A newly created entity is unjoined. `import_tables` in particular can land several entities at once with their foreign key columns exposed as attributes but nothing connected, so metrics cannot reach across them and filters do not propagate. **Do not end the task at validation — close the loop on relations.**
+Relations are what make a new entity reachable from the rest of the model — without them no metric can cross into it and filters do not propagate. `import_tables` is the sharp case: it lands several entities at once with their foreign key columns mapped as attributes and nothing connected. Once validation passes, close the loop.
 
-Steps, after validation succeeds:
+Skip this section if the user declined relations. If they already named the joins they want, go straight to the `relation-creation` skill.
 
-1. **Honor what the user already said.** If they named the joins they want, go straight to the `relation-creation` skill. If they said not to create relations, stop here.
-2. **Look for candidates.** Scan the new entities' attributes for foreign key columns and match them against the keys of entities already in the model (`list_entities`, `get_entity`, `search_model`). When several tables were imported together, also check for FKs pointing between the new entities themselves.
-3. **Ask before creating.** Present the candidates you found — source (many side) → target (one side), the FK/PK column pair, and how confident you are it is a real relation — and ask the user which to create. Never create relations silently off an inferred FK.
-4. **Hand off.** For each confirmed relation, invoke the `relation-creation` skill; it covers join type, direction, cross-filtering, and its own pre-implementation options step.
-5. **Say so when there is nothing.** If no FK candidates surface, tell the user in one line that the entity stands alone and ask whether it should join anything. Do not invent joins to fill the gap.
+1. **Read what already exists.** Call `get_entity` on each new entity. `create_entity` YAML can carry a `relations:` block, so some joins may already be defined — never propose one that is already there.
+2. **Look for candidates in both directions.** A relation lives on the entity holding the foreign key, which may be either side:
+   - **New entity is the many side** — an FK column among its attributes points at an existing entity's key.
+   - **New entity is the one side** — an existing entity holds an FK matching the new entity's key. This is the usual shape when importing a dimension into a model that already has facts, and it is invisible if you only scan the new entity.
+   - **Between new entities** — when several tables arrive from one `import_tables` call, check the batch against itself.
+
+   Search by FK column name with `search_model` (`search_mode: EXACT`) rather than fetching every entity; on a large model, scope the sweep to the same database and schema. See [Discovery Helpers](#discovery-helpers) for the tools.
+3. **Check for unmapped FKs.** If a new entity yields no candidates, run `get_table_info` on its source table — the FK may exist in the warehouse but never have been exposed as an attribute. Offer to map it (see Best Practices).
+4. **Ask which to create.** Present each candidate — source (many side) → target (one side) and the FK/PK column pair — and ask the user which they want. Never create a relation off an inferred FK silently. This decides *which* pairs to connect; *how* to connect them (join type, direction, cross-filtering) is `relation-creation`'s own pre-implementation step.
+5. **Hand off, batched by source entity.** Invoke the `relation-creation` skill for the confirmed relations. `update_object` replaces an entity's entire `relations:` block, so every relation for one source entity — including any it already had — must go in a single call. Creating them one at a time deletes the previous one each time.
+6. **Report an empty result once.** If nothing surfaces, say so in one line. Ask whether the entity should join something only when the model holds entities it plausibly relates to; a deliberately standalone entity (a config lookup, a time spine) needs no prompt. Do not invent joins to fill the gap.
 
 ---
 
