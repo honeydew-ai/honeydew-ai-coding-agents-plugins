@@ -92,6 +92,72 @@ gemini extensions install https://github.com/honeydew-ai/honeydew-ai-coding-agen
 
 For coding agents that support MCP, configure the [Honeydew MCP server](https://honeydew.ai/docs/integration/mcp) and use the skill files in this repository as prompts or instructions. The skills are written as agent-agnostic markdown documentation that any coding agent can consume.
 
+## Updating an Installed Plugin
+
+Installing pins the version you installed. Most agents keep a cached copy of the marketplace, so an update is two steps: refresh the marketplace, then update the plugin itself.
+
+### Claude Code
+
+In a session, open the plugin manager and choose the update action:
+
+```
+/plugin
+```
+
+Then apply it:
+
+```
+/reload-plugins
+```
+
+Or from the shell — refresh the marketplace first, or the update will not see a new version:
+
+```bash
+claude plugin marketplace update honeydew-ai-claude-plugins
+claude plugin update honeydew-ai
+```
+
+Restart Claude Code to apply. `claude plugin list` shows the installed version.
+
+### Codex
+
+Codex has no plugin-level upgrade command. Refresh the marketplace snapshot, then re-add the plugin to pick up the new version:
+
+```bash
+codex plugin marketplace upgrade honeydew-ai-coding-agents-plugins
+codex plugin add honeydew-ai@honeydew-ai-coding-agents-plugins
+```
+
+The `/plugins` menu inside a `codex` session does the same thing interactively.
+
+### GitHub Copilot CLI
+
+Refresh the marketplace catalog, then reinstall:
+
+```bash
+copilot plugin marketplace update honeydew-ai-github-copilot-plugins
+```
+
+```
+/plugin install honeydew-ai@honeydew-ai-github-copilot-plugins
+```
+
+### Cursor
+
+If you enabled **auto-refresh** on the marketplace at install time, updates arrive on their own. Otherwise, go back to [cursor.com/dashboard/plugins](https://cursor.com/dashboard/plugins), open the Team Marketplace holding the plugin, and refresh it — the plugin picks up the new version from there.
+
+### Gemini CLI
+
+```bash
+gemini extensions update honeydew-ai-tools
+```
+
+`gemini extensions update --all` updates every installed extension, and `gemini extensions list` shows the installed version. Installing with `gemini extensions install --auto-update` keeps it current without this step.
+
+### Other Coding Agents
+
+Pull the latest skill files from your clone of this repository. Nothing is cached elsewhere — the skills are read from disk.
+
 ## Available Skills
 
 The `honeydew-ai` plugin includes 13 skills:
