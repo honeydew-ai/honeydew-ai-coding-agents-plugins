@@ -123,7 +123,20 @@ source_filters:
     description: Partition pruning for performance
 ```
 
-Then expose it for analysis with `create_agent` referencing `revenue_analysis`, and hand questions to that agent:
+Then expose it for analysis with an agent that references the domain:
+
+```python
+create_agent(
+  agent={
+    "name": "revenue-analyst",
+    "display_name": "Revenue Analyst",
+    "description": "Answers revenue questions scoped to the revenue_analysis domain.",
+    "domain": "revenue_analysis"
+  }
+)
+```
+
+Agent names take the same form as context item names — lowercase words separated by dashes, with `/` for folders. Hand questions to that agent:
 
 ```python
 initiate_analysis(
