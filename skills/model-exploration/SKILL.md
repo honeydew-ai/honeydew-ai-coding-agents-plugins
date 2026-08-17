@@ -13,7 +13,7 @@ When the goal is to understand, explain, or investigate something in the data �
 
 Hand it the goal, not a plan built from what exploration just found. The fields you discovered here are a subset of the context the analyst has, and a question that prescribes the exact dimensions and steps suppresses the rest of it — see **Asking the Question** in the `query` skill.
 
-`get_data_from_fields` in this skill is for spot-checks: confirm a field's values, verify a count, sample rows. Exact numbers from a spot-check are not an analysis — running a third structured query to assemble an answer is the signal to escalate to deep analysis.
+`get_data_from_fields` in this skill is for spot-checks: confirm a field's values, verify a count, sample rows. Exact numbers from a spot-check are not an analysis. A question needing more than one query belongs in deep analysis, and **if two have already run for one question, the third is a hard stop** — hand the original question to `initiate_analysis`, because assembling an answer from parts is the job you would be delegating.
 
 ## When To Use This Skill
 
@@ -30,6 +30,9 @@ Use the `get_entity` MCP tool with the relevant entity name to list its attribut
 
 **Step 3: Search the model**
 Use the `search_model` MCP tool to find specific fields, entities, or other objects by name.
+
+**What these steps do not show you**
+They return the semantic layer. The context layer — the instructions, knowledge, and memory recording which of these fields and filters are correct for a given question — is applied only by `initiate_analysis`. A field list that looks complete is half the picture; `list_agents` and `list_context_items` show what exists in the other half, and `get_context_item` shows what one of them says.
 
 ---
 
@@ -105,7 +108,7 @@ Call `get_data_from_fields` with:
 - `attributes`: `["order_header.order_year_month"]`
 - `metrics`: `["order_header.total_revenue"]`
 - `filters`: `["order_header.order_year_month LIKE '2021%'"]`
-- `order_by`: `["\"order_header.order_year_month\" ASC"]` — field references must be wrapped in double quotes, like SQL identifiers
+- `order_by`: `["order_header.order_year_month ASC"]` — direction defaults to ASC
 - `domain`: `"my_domain"` (optional)
 - `limit`: max rows to return (default: 100)
 - `offset`: rows to skip (for pagination)

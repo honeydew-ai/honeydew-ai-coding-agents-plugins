@@ -11,7 +11,11 @@
 #
 #   * At most one deny per (session, skill). The marker is claimed by the deny
 #     itself, so a model that retries without loading the skill is never
-#     blocked a second time and cannot be locked out of Honeydew.
+#     blocked a second time and cannot be locked out of Honeydew. A deny
+#     therefore reaches a session's first matching call and no later one, so it
+#     cannot carry guidance that depends on how many calls have happened: a rule
+#     about the third query in a row is enforceable by the skill it loads, never
+#     by this message.
 #   * Uncertainty about the hook's own footing allows the call: a skill that is
 #     not installed, state that cannot be recorded, a payload that will not
 #     parse. None of these block work on a hook's bad day.

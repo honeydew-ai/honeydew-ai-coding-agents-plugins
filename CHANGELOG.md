@@ -2,6 +2,22 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.8] - 2026-08-17
+
+### Added
+
+- **Subagent briefs** — the `query` skill now gives the wording to put in a brief for a subagent doing Honeydew work: which skills it must invoke since it inherits none, and which agent name to look up with `list_agents` before spawning, since `initiate_analysis` needs either an agent or a conversation.
+
+### Changed
+
+- **`query` and `model-exploration` route on whether the specification is yours to choose** — the user naming fields, a prior analysis reporting them, or a field under test means a structured query; choosing the field, filter or population yourself means `initiate_analysis`, and a third query for one question is a hard stop.
+- **Deep analysis leads the `query` skill's overview table and worked example**, and the structured-query section is shorter by five examples and an SQL-preview note, with cross-entity querying and post-aggregation filtering kept as prose.
+
+### Fixed
+
+- **`domain-creation` showed a tool and a parameter that do not exist** — its deep-analysis example called `ask_deep_analysis_question(domain=…)`. It now calls `initiate_analysis` with the agent that carries the domain.
+- **The `query` skill's `stop_reason` table was wrong in three ways** — `FAIL` was missing, "still running" was listed as a `stop_reason` when it is a `status`, and the `order_by` parameter above it required double-quoting that the query API does not need. Two example agent names used underscores where agent names take dashes.
+
 ## [1.3.7] - 2026-08-14
 
 ### Added
