@@ -341,7 +341,7 @@ References in the response can be expanded for deeper inspection:
 
 A subagent does not inherit the skills you have loaded, and your brief outranks any skill it does load — so the brief is where its choice of path gets made. Put these in it:
 
-1. "Load the `honeydew-ai:query` skill before any Honeydew work — you do not inherit mine. Use whatever your client provides for that; if it has none, read the plugin's `skills/query/SKILL.md`. Add `honeydew-ai:model-exploration` if you will be discovering entities or fields."
+1. "Load the `honeydew-ai:query` skill before any Honeydew work — you do not inherit mine. Add `honeydew-ai:model-exploration` if you will be discovering entities or fields."
 2. "This task is [an investigation / a set of lookups]. For investigation, call `initiate_analysis` with agent `<name>` and hand it the goal, not a plan. For the lookups, the exact fields are given below."
 3. If an analysis already exists: "Continue conversation `<conversation_id>` rather than starting a parallel investigation."
 
