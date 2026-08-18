@@ -97,7 +97,7 @@ entities:
 
 ## Domain for deep analysis context
 
-Creating a focused domain to use with `ask_deep_analysis_question`.
+Creating a focused domain to use with deep analysis.
 
 Call `create_object` with yaml_text:
 
@@ -123,14 +123,29 @@ source_filters:
     description: Partition pruning for performance
 ```
 
-Then use the domain for analysis:
+Then expose it for analysis with an agent that references the domain:
 
 ```python
-ask_deep_analysis_question(
-  question="What were the top revenue drivers? Break down by product category and customer segment.",
-  domain="revenue_analysis"
+create_agent(
+  agent={
+    "name": "revenue-analyst",
+    "display_name": "Revenue Analyst",
+    "description": "Answers revenue questions scoped to the revenue_analysis domain.",
+    "domain": "revenue_analysis"
+  }
 )
 ```
+
+Agent names take the same form as context item names — lowercase words separated by dashes, with `/` for folders. Hand questions to that agent:
+
+```python
+initiate_analysis(
+  question="What were the top revenue drivers?",
+  agent="revenue-analyst"
+)
+```
+
+`initiate_analysis` takes no `domain` parameter — the agent carries the domain, along with the context items that tell the analyst how to use it.
 
 ## Domain with parameter-based filter
 

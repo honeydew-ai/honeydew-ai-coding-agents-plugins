@@ -11,12 +11,12 @@ Queries run against the workspace and branch set for the current session. Use `g
 
 ## Overview
 
-Honeydew provides three ways to query data through the semantic layer. Each method suits a different situation — pick the right one based on how well you understand the model and how complex the question is.
+Honeydew gives you two ways to answer a question about the data, plus tools for reviewing analyses and queries that already ran. Choose between the two by asking whether the specification — which fields, which filters, which population — is given to you or chosen by you.
 
 | Method                    | Tool                                              | Best For                                                                         |
 | ------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------- |
-| **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | Retrieving a specific figure or row set. Deterministic, full control.            |
-| **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | Understanding, explaining, or investigating — anything beyond a lookup.          |
+| **Deep analysis**         | `initiate_analysis` + `monitor_analysis`          | **Default for any question about the data.** The only path that applies the context layer — your organization's instructions, knowledge, and memory about which fields and definitions are correct for a given question. |
+| **Structured query**      | `get_data_from_fields` / `get_sql_from_fields`    | Executing a specification you already trust. Deterministic execution — and no check that the specification is right. |
 | **Explain a prior step**  | `get_analysis_step_details`                       | User asks how a specific step in a prior analysis was calculated.                |
 | **Browse past analyses**  | `list_analysis_chats`                             | User wants to see past conversations or find a prior analysis.                   |
 | **Read a past conversation** | `get_stored_conversation`                      | User wants to read or review the full content of a specific past conversation.   |
@@ -26,30 +26,7 @@ Honeydew provides three ways to query data through the semantic layer. Each meth
 
 ## When to Use Each Method
 
-### 1. Structured Query (`get_data_from_fields` / `get_sql_from_fields`)
-
-**Use when:**
-
-- You know the entity, attribute, and metric names (or can discover them via `list_entities` / `get_entity`)
-- You need precise control over filters, ordering, and field selection
-- You want deterministic, reproducible results
-- You need to validate a newly created metric or attribute
-- The user specifies exact fields like "show me `detailed_listings.price` by `detailed_listings.room_type`"
-
-**Do NOT use when:**
-
-- The question requires multi-step reasoning or investigation
-- The goal is to understand, explain, or investigate rather than to retrieve a known figure — knowing the field names does not make a structured query the right tool
-- You would need several structured queries to assemble the answer — hand the question to deep analysis instead
-
-**How it works:**
-
-- `get_data_from_fields` — executes the query and returns data rows
-- `get_sql_from_fields` — returns the generated SQL without executing. Use it when the SQL itself is what's wanted: handing it to the warehouse, dbt, or another tool, or bisecting a failing query to watch a fragment appear and disappear (see the **query-debugging** skill). The output is long machine-generated SQL — to understand what a field computes, read the model with `get_field` / `get_entity` instead
-
-Both take the same field parameters.
-
-### 2. Deep Analysis (`initiate_analysis` + `monitor_analysis`)
+### Deep Analysis (`initiate_analysis` + `monitor_analysis`)
 
 **Use when:**
 
@@ -60,6 +37,28 @@ Both take the same field parameters.
 - The question is open-ended and may require looking at the data from multiple angles
 - Follow-up questions build on prior analysis (use `conversation_id`)
 - A figure is wanted whose fields you cannot identify, and finding them would take more work than handing over the question
+
+### Structured Query (`get_data_from_fields` / `get_sql_from_fields`)
+
+**Use when:**
+
+- The user named the exact fields — "show me `detailed_listings.price` by `detailed_listings.room_type`" — so the specification is theirs
+- A prior analysis reported the fields and filters it used, and you want another slice or the raw numbers behind one of its claims
+- You are testing a specification rather than relying on one: validating a metric or attribute you just created, spot-checking a field's values, verifying a count
+- You need precise control over filters, ordering, and pagination for a figure whose definition is not in question
+
+**Do NOT use when:**
+
+- The goal is to understand, explain, or investigate rather than to retrieve a known figure — knowing the field names does not make a structured query the right tool
+- The answer depends on a choice you would be making about which field, filter, or population is correct — that choice is what the context layer records, and a structured query applies none of it
+- You would need more than one query to assemble the answer — hand the question over instead. **And if two have already run for one question, the third is a hard stop**
+
+**How it works:**
+
+- `get_data_from_fields` — executes the query and returns data rows
+- `get_sql_from_fields` — returns the generated SQL without executing. Use it when the SQL itself is what's wanted: handing it to the warehouse, dbt, or another tool, or bisecting a failing query to watch a fragment appear and disappear (see the **query-debugging** skill). The output is long machine-generated SQL — to understand what a field computes, read the model with `get_field` / `get_entity` instead
+
+Both take the same field parameters.
 
 ---
 
@@ -89,15 +88,17 @@ User asks a data question
     │
     └─► Retrieving a specific figure or row set?
             │
-            ├─► You know the exact field names → get_data_from_fields
+            ├─► The specification is given, not chosen by you — the user named
+            │   the fields, a prior analysis reported them, or the specification
+            │   is itself what you are testing → get_data_from_fields
             │         (or get_sql_from_fields to preview SQL without executing)
             │
-            └─► You don't → initiate_analysis + monitor_analysis
+            └─► You would be choosing it → initiate_analysis + monitor_analysis
 ```
 
 ---
 
-## Method 1: Structured Query
+## Structured Query in Detail
 
 ### Field Parameters
 
@@ -105,8 +106,8 @@ A structured query uses flat field parameters to define what data to retrieve:
 
 - **`attributes`** — dimensions to group by (columns in the output), e.g. `["entity.attribute_name"]`
 - **`metrics`** — aggregated measures (SUM, COUNT, AVG, etc.), e.g. `["entity.metric_name"]`
-- **`filters`** — row-level filters applied before aggregation, e.g. `["entity.field = 'value'"]`
-- **`order_by`** — sort order for results. **Each entry MUST be a quoted string**, as if it were a SQL identifier — e.g. `["\"entity.field\" ASC"]`. Always wrap the field reference in double quotes inside the string.
+- **`filters`** — row-level filters applied before aggregation, e.g. `["entity.field = 'value'"]`. A filter written over an aggregate instead applies after aggregation — see the **filtering** skill
+- **`order_by`** — sort order for results, e.g. `["entity.field DESC"]`. When a field is aliased, sort on the alias.
 - **`domain`** — optional domain name for query context
 - **`limit`** — max rows to return (default: 100)
 - **`offset`** — rows to skip (for pagination)
@@ -125,21 +126,7 @@ Before building a query, discover the available fields:
 
 ### Examples
 
-**Simple metric query — total count:**
-
-Call `get_data_from_fields` with:
-
-- `metrics`: `["detailed_listings.count"]`
-
-**Dimension breakdown — listings by room type:**
-
-Call `get_data_from_fields` with:
-
-- `attributes`: `["detailed_listings.room_type"]`
-- `metrics`: `["detailed_listings.count"]`
-- `order_by`: `["\"detailed_listings.count\" DESC"]`
-
-**Filtered query — only entire homes:**
+**Filtered breakdown — entire homes by neighbourhood:**
 
 Call `get_data_from_fields` with:
 
@@ -148,13 +135,7 @@ Call `get_data_from_fields` with:
 - `filters`: `["detailed_listings.room_type = 'Entire home/apt'"]`
 - `order_by`: `["\"detailed_listings.count\" DESC"]`
 
-**Cross-entity query — listings with host info:**
-
-Call `get_data_from_fields` with:
-
-- `attributes`: `["detailed_listings.room_type", "dim_host.host_is_superhost"]`
-- `metrics`: `["detailed_listings.count"]`
-- `order_by`: `["\"detailed_listings.count\" DESC"]`
+Attributes may span entities wherever a relation exists — adding `dim_host.host_is_superhost` to the list above joins host detail into the same breakdown.
 
 **Using aliases — rename fields or ad-hoc expressions:**
 
@@ -168,30 +149,6 @@ Call `get_data_from_fields` with:
 
 Once aliased, use the alias (not the original expression) in `order_by`.
 
-**Pagination — large result sets:**
-
-Call `get_data_from_fields` with:
-
-- `attributes`: (your fields)
-- `metrics`: (your metrics)
-- `limit`: 50 (max rows to return)
-- `offset`: 100 (skip first 100 rows)
-
-**Finding duplicate values:**
-
-Call `get_data_from_fields` with:
-
-- `attributes`: `["detailed_listings.host_name"]`
-- `metrics`: `["COUNT(detailed_listings.host_name)"]`
-- `filters`: `["COUNT(detailed_listings.host_name) > 1"]`
-- `order_by`: `["\"COUNT(detailed_listings.host_name)\" DESC"]`
-
-This groups by the attribute, counts occurrences, and filters to only rows that appear more than once — surfacing duplicates.
-
-**SQL preview only:**
-
-Call `get_sql_from_fields` with the same field parameters to see the generated SQL without executing.
-
 ### Filter Syntax
 
 Filters use standard comparison expressions: `=`, `>`, `<`, `IN (...)`, `ILIKE`, `SEARCH(...)`, `IS NULL`, booleans, date ranges, and `AND`/`OR` combinations.
@@ -200,9 +157,9 @@ Filters use standard comparison expressions: `=`, `>`, `<`, `IN (...)`, `ILIKE`,
 
 ---
 
-## Method 2: Deep Analysis
+## Deep Analysis in Detail
 
-Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, so a figure you could pull with a structured query over fields you already know is not worth delegating. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
+Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, so a figure whose **definition is not in question** — one the user specified, one a prior analysis established, one you are spot-checking — is not worth delegating. Knowing the field names is not that test. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
 
 ### Asking the Question
 
@@ -211,7 +168,7 @@ State the goal, not the plan. The analyst has context you do not: instructions, 
 - Ask: "What's driving the revenue decline in Q3?"
 - Not: "Compare revenue by category and region for Q3 vs Q2, then rank categories by delta."
 
-Add precision through follow-ups instead, once the interpretation and plan come back — by then the analyst has its context loaded and a specific redirection lands on top of it rather than in place of it.
+Add precision through follow-ups instead, once the interpretation and plan come back — by then the analyst has its context loaded and a specific redirection lands on top of it rather than in place of it. Precision about what you want to know, though, not about how to compute it: a follow-up is as much a goal as the first question, so ask whether the pattern holds rather than naming the breakdown you expect.
 
 ### initiate_analysis + monitor_analysis
 
@@ -229,15 +186,15 @@ Returns a `conversation_id` immediately. New conversations also return a `ui_url
 
 **Step 2 — poll until done:**
 
-Call `monitor_analysis` repeatedly with the `conversation_id` until `status` is `"DONE"`. Each call returns only new messages since the last call.
+Call `monitor_analysis` repeatedly with the `conversation_id`. Each call returns only new messages since the last call. `status` is `"STILL_RUNNING"` while the analysis works and `"DONE"` once it has stopped; `"NO_CHAT_CURRENTLY_RUNNING"` means it had already finished before you polled — read that one with `get_stored_conversation` rather than polling on.
 
-**`stop_reason` values — what they mean:**
+`status` and `stop_reason` are separate fields and `DONE` belongs to both. `status` says whether the run has stopped; once it has, `stop_reason` says what kind of ending it was. `NO_CHAT_CURRENTLY_RUNNING` is never a `stop_reason`.
 
 | `stop_reason` | Meaning | What to do |
 |---------------|---------|------------|
-| `null` | Still running | Keep polling |
 | `"DONE"` | Finished normally | Read `responses` array for the final report |
 | `"ASK"` | Analysis paused to ask a clarifying question | Read `responses` for the question, answer with a new `initiate_analysis` on the same `conversation_id` |
+| `"FAIL"` | The run ended without producing an answer | There is nothing in `responses` to report. Do not present partial progress as a result — say the analysis did not complete. A follow-up on the same `conversation_id` starts fresh rather than resuming |
 | `"ABORTED"` | This execution run was stopped | **Not terminal.** Conversation state is preserved — continue with a new `initiate_analysis` on the same `conversation_id` |
 
 **Report progress when it's meaningful to the user** — not every poll, but not silently either. Use judgement:
@@ -251,7 +208,7 @@ When `status` is `"DONE"`, the final user-facing report is in the `responses` ar
 
 ```
 # Example
-initiate_analysis(question="What's driving revenue across cuisine types?", agent="my_agent")
+initiate_analysis(question="What's driving revenue across cuisine types?", agent="listings-analyst")
 → { conversation_id: "abc123", ui_url: "https://..." }
 
 # Poll loop — report to user after each call that has new content
@@ -292,7 +249,7 @@ There is one entry per conversation, covering the conversation as a whole, and a
 Tag it `[agent]` and name the evidence, so a review pass can separate agent-sourced feedback from the user's. Keep `<Reason>:` leading on negative feedback so the reason stays machine-readable:
 
 - `"Data Issue: [agent] reported total revenue 4.2M, but get_data_from_fields on order_detail.revenue with the same date filter returns 3.8M"`
-- `"[agent] verified against an independent structured query on order_detail.revenue by menu.item_category for 2021 — figures match"`
+- `"[agent] verified against an independent get_data_from_fields call on order_detail.revenue by menu.item_category for 2021 — figures match"`
 
 With no check to name, leave no feedback. That is a correct outcome, not a skipped step.
 
@@ -302,7 +259,7 @@ Use `conversation_id` from the previous analysis to ask follow-up questions that
 
 ```
 initiate_analysis(
-  question="Now break this down by room type — does the pattern hold?",
+  question="Does that pattern hold across room types, or is one of them driving it?",
   conversation_id="abc123"
 )
 ```
@@ -380,6 +337,20 @@ References in the response can be expanded for deeper inspection:
 
 ---
 
+## Delegating to a Subagent
+
+A subagent does not inherit the skills you have loaded, and your brief outranks any skill it does load. Put these in it:
+
+1. "Load the `honeydew-ai:query` skill before any Honeydew work — you do not inherit mine. Add `honeydew-ai:model-exploration` if you will be discovering entities or fields."
+2. "This task is [an investigation / a set of lookups]. For investigation, call `initiate_analysis` with agent `<name>` and hand it the goal, not a plan. For the lookups, the exact fields are given below."
+3. If an analysis already exists: "Continue conversation `<conversation_id>` rather than starting a parallel investigation."
+
+Name the agent yourself in point 2, looked up with `list_agents` — `initiate_analysis` needs either `agent` or `conversation_id`.
+
+Scope tool guidance per question rather than per subagent: a brief covering both a count and an investigation gets governed by whichever instruction it states. Never make the analysis path conditional on the subagent judging the task multi-step.
+
+---
+
 ## Browsing Past Analyses
 
 ### list_analysis_chats
@@ -434,11 +405,11 @@ Methods chain in both directions.
 
 User: "Help me understand pricing patterns for Airbnb listings."
 
-1. Discover entities: `list_entities` → find `detailed_listings`
-2. Explore fields: `get_entity` for `detailed_listings` → find `price`, `room_type`, `neighbourhood_cleansed`
-3. Targeted query: `get_data_from_fields` → price distribution by neighbourhood for Entire homes only
-4. Deep dive: `initiate_analysis` → "What factors most influence listing price?"
-5. Follow up on its result: `get_data_from_fields` with the fields the analysis reported → the exact numbers behind the driver it identified
+1. Orient: `list_entities` / `get_entity` → find `detailed_listings` and what it holds
+2. Pick the analyst: `list_agents` → the agent whose domain covers listings
+3. Hand over the goal: `initiate_analysis` → "What factors most influence listing price?" — show the user the `ui_url` it returns
+4. Poll `monitor_analysis` and report progress as steps produce findings
+5. Cut its result: `get_data_from_fields` with the fields the analysis reported → the exact numbers behind the driver it identified
 
 ---
 
@@ -471,6 +442,8 @@ Call `get_data_from_fields` with:
 
 This returns each unique `room_type` along with its count, ordered by frequency. The count is a useful bonus — it tells you how common each value is — but the key point is that the query returns **one row per distinct value**.
 
+The count can also be filtered on. A breakdown by `detailed_listings.host_name` with `filters`: `["COUNT(detailed_listings.host_name) > 1"]` returns only the values occurring more than once — which is how you surface duplicates.
+
 This pattern is useful for:
 
 - **Exploring filter values** — find out what values exist before writing a filter expression (see the **filtering** skill)
@@ -489,9 +462,9 @@ If your environment has visualization tools, render visualizations when they wou
 
 ## Best Practices
 
-- **Start with discovery** — always check `list_entities` / `get_entity` before building queries, so you reference real fields
-- **Use structured queries for precision** — when you know the fields, `get_data_from_fields` gives you full control and reproducible results
 - **Use deep analysis for insight** — anything beyond a lookup goes to `initiate_analysis`: "why", "how", trends, drivers, or any question needing more than one query. Let the analysis engine plan the investigation instead of chaining structured queries by hand
+- **Use structured queries for a settled specification** — when the fields and filters were given to you rather than chosen by you, `get_data_from_fields` executes them exactly and reproducibly
+- **Discover before you query, not instead of delegating** — check `list_entities` / `get_entity` so you reference real fields; a field list in hand is not a reason to answer the question yourself
 - **Delegate the goal, not the plan** — an over-specified question suppresses the semantic-layer context the analyst would otherwise load, and the steps you prescribe may be wrong precisely because you lack that context. Add precision in follow-ups
 - **Stay in the conversation for reasoning, drop out for slices** — follow up when the next step needs reasoning or reuses groups the analysis already computed; use `get_data_from_fields` when you just need deterministic numbers
 - **Report meaningful progress, not every step** — surface a one-liner when a step produces a substantive finding; skip internal retries and error-recovery steps the user doesn't need to see
