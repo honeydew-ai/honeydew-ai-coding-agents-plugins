@@ -108,7 +108,7 @@ Call `get_data_from_fields` with:
 - `attributes`: `["order_header.order_year_month"]`
 - `metrics`: `["order_header.total_revenue"]`
 - `filters`: `["order_header.order_year_month LIKE '2021%'"]`
-- `order_by`: `["order_header.order_year_month ASC"]` — direction defaults to ASC
+- `order_by`: `["order_header.order_year_month ASC"]`
 - `domain`: `"my_domain"` (optional)
 - `limit`: max rows to return (default: 100)
 - `offset`: rows to skip (for pagination)

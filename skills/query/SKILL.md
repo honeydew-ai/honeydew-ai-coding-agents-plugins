@@ -107,7 +107,7 @@ A structured query uses flat field parameters to define what data to retrieve:
 - **`attributes`** — dimensions to group by (columns in the output), e.g. `["entity.attribute_name"]`
 - **`metrics`** — aggregated measures (SUM, COUNT, AVG, etc.), e.g. `["entity.metric_name"]`
 - **`filters`** — row-level filters applied before aggregation, e.g. `["entity.field = 'value'"]`. A filter written over an aggregate instead applies after aggregation — see the **filtering** skill
-- **`order_by`** — sort order for results, e.g. `["entity.field DESC"]`. Direction defaults to ASC; when a field is aliased, sort on the alias.
+- **`order_by`** — sort order for results, e.g. `["entity.field DESC"]`. When a field is aliased, sort on the alias.
 - **`domain`** — optional domain name for query context
 - **`limit`** — max rows to return (default: 100)
 - **`offset`** — rows to skip (for pagination)
@@ -341,7 +341,7 @@ References in the response can be expanded for deeper inspection:
 
 A subagent does not inherit the skills you have loaded, and your brief outranks any skill it does load — so the brief is where its choice of path gets made. Put these in it:
 
-1. "Load the `honeydew-ai:query` skill before any Honeydew work — the Skill tool on Claude Code, its SKILL.md on Codex — you do not inherit mine. Add `honeydew-ai:model-exploration` if you will be discovering entities or fields."
+1. "Load the `honeydew-ai:query` skill before any Honeydew work — you do not inherit mine. Use whatever your client provides for that; if it has none, read the plugin's `skills/query/SKILL.md`. Add `honeydew-ai:model-exploration` if you will be discovering entities or fields."
 2. "This task is [an investigation / a set of lookups]. For investigation, call `initiate_analysis` with agent `<name>` and hand it the goal, not a plan. For the lookups, the exact fields are given below."
 3. If an analysis already exists: "Continue conversation `<conversation_id>` rather than starting a parallel investigation."
 
