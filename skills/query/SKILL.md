@@ -50,8 +50,8 @@ Honeydew gives you two ways to answer a question about the data, plus tools for 
 **Do NOT use when:**
 
 - The goal is to understand, explain, or investigate rather than to retrieve a known figure — knowing the field names does not make a structured query the right tool
-- The answer depends on a choice you would be making about which field, filter, or population is correct. That choice is what the context layer records, and a structured query applies none of it — it executes your specification exactly and cannot tell you the specification is wrong
-- You would need more than one query to assemble the answer — hand the question over instead. **And if two have already run for one question, the third is a hard stop**: assembling an answer from parts is the job you would be delegating
+- The answer depends on a choice you would be making about which field, filter, or population is correct — that choice is what the context layer records, and a structured query applies none of it
+- You would need more than one query to assemble the answer — hand the question over instead. **And if two have already run for one question, the third is a hard stop**
 
 **How it works:**
 
@@ -159,7 +159,7 @@ Filters use standard comparison expressions: `=`, `>`, `<`, `IN (...)`, `ILIKE`,
 
 ## Deep Analysis in Detail
 
-Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, so a figure whose **definition is not in question** — one the user specified, one a prior analysis established, one you are spot-checking — is not worth delegating. Knowing the field names is not the same test: exploration returns the semantic layer only, and the context layer may hold an instruction that the obvious field or filter is the wrong one for this question. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
+Deep analysis is a stateful, resumable analyst sub-agent: you delegate a goal to it and monitor it, rather than driving its steps. It plans its own investigation, keeps its own memory (the `conversation_id` is its scratchpad), can pause to ask a clarifying question, and can be aborted and resumed without losing what it has computed. You reach it through a polling loop rather than a single call, so a figure whose **definition is not in question** — one the user specified, one a prior analysis established, one you are spot-checking — is not worth delegating. Knowing the field names is not that test. The rules below follow from that — hand it the goal rather than a plan, correct it by interrupting and resuming rather than starting over, and open a fresh conversation for an unrelated task rather than putting it in this one's context.
 
 ### Asking the Question
 
@@ -339,15 +339,15 @@ References in the response can be expanded for deeper inspection:
 
 ## Delegating to a Subagent
 
-A subagent does not inherit the skills you have loaded, and your brief outranks any skill it does load — so the brief is where its choice of path gets made. Put these in it:
+A subagent does not inherit the skills you have loaded, and your brief outranks any skill it does load. Put these in it:
 
 1. "Load the `honeydew-ai:query` skill before any Honeydew work — you do not inherit mine. Add `honeydew-ai:model-exploration` if you will be discovering entities or fields."
 2. "This task is [an investigation / a set of lookups]. For investigation, call `initiate_analysis` with agent `<name>` and hand it the goal, not a plan. For the lookups, the exact fields are given below."
 3. If an analysis already exists: "Continue conversation `<conversation_id>` rather than starting a parallel investigation."
 
-Name the agent yourself in point 2, looked up with `list_agents`: `initiate_analysis` needs either `agent` or `conversation_id`, and a brief supplying neither leaves the subagent to error on its first call.
+Name the agent yourself in point 2, looked up with `list_agents` — `initiate_analysis` needs either `agent` or `conversation_id`.
 
-Scope tool guidance per question rather than per subagent. A brief covering both a count and an investigation gets governed by whichever instruction it states, so say which applies to which question. Do not write "use structured queries for exact figures, deep analysis only if genuinely multi-step" — it inverts the default and gates the analysis path behind a judgement the subagent makes holding a field list and none of this skill.
+Scope tool guidance per question rather than per subagent: a brief covering both a count and an investigation gets governed by whichever instruction it states. Never make the analysis path conditional on the subagent judging the task multi-step.
 
 ---
 
@@ -410,8 +410,6 @@ User: "Help me understand pricing patterns for Airbnb listings."
 3. Hand over the goal: `initiate_analysis` → "What factors most influence listing price?" — show the user the `ui_url` it returns
 4. Poll `monitor_analysis` and report progress as steps produce findings
 5. Cut its result: `get_data_from_fields` with the fields the analysis reported → the exact numbers behind the driver it identified
-
-Steps 1–2 orient you in the model; they do not turn the question into a lookup.
 
 ---
 

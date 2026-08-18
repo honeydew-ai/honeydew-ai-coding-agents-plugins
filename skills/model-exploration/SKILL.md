@@ -13,7 +13,7 @@ When the goal is to understand, explain, or investigate something in the data �
 
 Hand it the goal, not a plan built from what exploration just found. The fields you discovered here are a subset of the context the analyst has, and a question that prescribes the exact dimensions and steps suppresses the rest of it — see **Asking the Question** in the `query` skill.
 
-`get_data_from_fields` in this skill is for spot-checks: confirm a field's values, verify a count, sample rows. Exact numbers from a spot-check are not an analysis. A question needing more than one query belongs in deep analysis, and **if two have already run for one question, the third is a hard stop** — hand the original question to `initiate_analysis`, because assembling an answer from parts is the job you would be delegating.
+`get_data_from_fields` in this skill is for spot-checks: confirm a field's values, verify a count, sample rows. Exact numbers from a spot-check are not an analysis. A question needing more than one query belongs in deep analysis, and **if two have already run for one question, the third is a hard stop** — hand the original question to `initiate_analysis`.
 
 ## When To Use This Skill
 
