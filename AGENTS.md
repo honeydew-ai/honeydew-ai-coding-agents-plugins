@@ -3,7 +3,7 @@
 ## Repo Structure
 
 ```
-skills/                          # All 13 skills (single honeydew-ai plugin)
+skills/                          # All 16 skills (single honeydew-ai plugin)
   filtering/
   query/
   query-debugging/
@@ -17,6 +17,9 @@ skills/                          # All 13 skills (single honeydew-ai plugin)
   relation-creation/
   validation/
   workspace-branch/
+  performance-tuning/
+  aggregate-recommendation/
+  entity-cache-recommendation/
 hooks/                           # PreToolUse hook scripts (shared by Claude Code and Codex)
 assets/                          # logo.svg
 plugins/honeydew-ai/             # Codex marketplace wrapper path (symlinks to root plugin files)
