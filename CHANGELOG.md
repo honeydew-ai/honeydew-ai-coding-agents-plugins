@@ -2,6 +2,14 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.4.0] - 2026-08-30
+
+### Added
+
+- **`performance-tuning` skill** — a front-door router for making the model faster when you have not chosen an approach. It reads query history to diagnose where a slow workload spends its time and routes to the right lever: aggregate awareness, entity caching, materialization, or filtering/sampling.
+- **`aggregate-recommendation` skill** — turns query history into aggregate-awareness pre-aggregations. It ranks recurring costly metric+grain shapes, checks coverage with the aggregate debug report, and builds usage-aligned, entity-key-grained caches on a branch, reporting the row-reduction ratio so you only build aggregates that pay off.
+- **`entity-cache-recommendation` skill** — finds expensive calculated attributes (window functions, aggregations, JOINs, large scans) that recompute on every query and enables an entity cache on a branch. It makes refresh-after-ETL timing an explicit decision so a materialized cache never serves stale data.
+
 ## [1.3.8] - 2026-08-17
 
 ### Added
