@@ -34,13 +34,15 @@ Paginate with `offset` until you have covered the desired time window or convers
 
 - `conversation_id`
 - `title`
-- `feedback` (the stored feedback text, if any)
+- `user_feedback` (the stored feedback text, if any)
 - `agent` and `domain`
-- `created_at` and `created_by`
+- creation time and the display name of the user who created it
+- the client it was started from and the model it ran with
+- how its last question ended: `DONE`, `ASK`, `FAIL`, or `ABORTED`
 
-**Filter to conversations with feedback.** Skip conversations with no feedback unless the user explicitly wants to review all conversations.
+**Filter to conversations with feedback.** Skip conversations with no feedback unless the user explicitly wants to review all conversations. One exception: include conversations whose last question ended in `FAIL` even without feedback — a failed analysis is a signal in itself, and users rarely rate a conversation that never answered.
 
-If a conversation has no feedback or the stored feedback is inaccurate, use `provide_analysis_feedback` to record the correct label before categorizing:
+If the stored feedback is inaccurate, or a conversation you are reviewing has none, use `provide_analysis_feedback` to record the correct label before categorizing. A `FAIL` conversation with no feedback is the exception: read it first with `get_stored_conversation` (see 1.2) and label it only once you know what went wrong. Leave its feedback empty if the failure has no clear cause.
 
 ```
 provide_analysis_feedback(conversation_id="abc123", feedback="Data Issue: net revenue metric missing")
@@ -86,6 +88,7 @@ For each conversation with feedback, assign it to one or more of the following *
 | `Wrong Judgement: lacked business context` | Missing knowledge or memory | **Add knowledge / memory** |
 | `Wrong Judgement: wrong domain or agent` | Agent misconfigured | **Update agent** |
 | `Chart Issue` | Visualization only | **No semantic action** |
+| Last question ended in `FAIL` (no feedback) | Analysis could not complete | **Manual review** — read the conversation with `get_stored_conversation` to find what it tried |
 | `Good` / positive | Working as intended | **No action** |
 | `Other: X` | Ambiguous | **Manual review** |
 

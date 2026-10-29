@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.3.9] - 2026-10-29
+
+### Changed
+
+- **`list_analysis_chats` entries now carry the client, model and last-question outcome** — the `query` and `conversation-review` skills describe the new fields and what to do with them: `ASK` and `ABORTED` conversations resume on the same `conversation_id`, and failed ones are reviewed even without feedback.
+
 ## [1.3.8] - 2026-08-17
 
 ### Added

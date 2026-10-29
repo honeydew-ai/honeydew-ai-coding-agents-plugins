@@ -358,7 +358,8 @@ Scope tool guidance per question rather than per subagent: a brief covering both
 Returns a paginated list of past analysis conversations for the current workspace, sorted newest first.
 
 - Admins see all conversations; non-admins see only their own.
-- Each entry includes: `conversation_id`, title, domain, agent, creation time, user feedback, and the display name of the user who created it.
+- Each entry includes: `conversation_id`, title, domain, agent, creation time, user feedback, the display name of the user who created it, the client it was started from, the model it ran with, and how its last question ended (`DONE`, `ASK`, `FAIL`, or `ABORTED`).
+- The last-question outcome tells you what a conversation needs before you open it: `ASK` is waiting for an answer and `ABORTED` was interrupted — both resume with `initiate_analysis` on the same `conversation_id`; `FAIL` did not complete.
 - Use `limit` and `offset` for pagination.
 
 ```
@@ -369,6 +370,7 @@ Use this when the user asks to:
 - "Show me my recent analyses"
 - "Find the analysis I ran last week on revenue"
 - "List all conversations in this workspace"
+- "Which analyses failed or are still waiting on a question?"
 
 ### get_stored_conversation
 
