@@ -160,7 +160,7 @@ Pull the latest skill files from your clone of this repository. Nothing is cache
 
 ## Available Skills
 
-The `honeydew-ai` plugin includes 13 skills:
+The `honeydew-ai` plugin includes 14 skills:
 
 | Skill | Description |
 |-------|-------------|
@@ -177,6 +177,7 @@ The `honeydew-ai` plugin includes 13 skills:
 | **query-debugging** | Review and inspect past query executions — what ran, from which client (BI tools, SQL interface, MCP, deep analysis), the semantic YAML and compiled SQL behind a run, and debugging failures |
 | **filtering** | Advanced filtering syntax — comparisons, string matching, date handling, nulls, and full-text search |
 | **conversation-review** | Bulk review past analysis conversations — categorize user feedback, build action items, and apply semantic/context layer improvements on a branch |
+| **aggregate-recommendation** | Build aggregate-awareness pre-aggregations from query history — rank costly recurring metric+grain shapes, check coverage with the aggregate debug report, and build usage-aligned entity-key caches on a branch |
 
 ## Supported Data Warehouses
 
