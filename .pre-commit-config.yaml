@@ -1,0 +1,9 @@
+---
+repos:
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: v1.32.0
+    hooks:
+      # Security audit of the CI config. --offline keeps it deterministic and
+      # token-free (the online audits need a GitHub token).
+      - id: zizmor
+        args: ["--no-progress", "--offline"]

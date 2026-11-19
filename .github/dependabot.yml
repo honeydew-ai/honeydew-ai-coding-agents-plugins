@@ -12,3 +12,11 @@ updates:
     # to avoid churn from freshly-released (and possibly buggy) versions.
     cooldown:
       default-days: 7
+
+  # Hook versions in .pre-commit-config.yaml, which is where zizmor is pinned.
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: daily
+    cooldown:
+      default-days: 7
