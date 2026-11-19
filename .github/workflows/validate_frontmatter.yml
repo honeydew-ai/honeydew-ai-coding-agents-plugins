@@ -7,13 +7,19 @@ on:
             - "**/skills/*/SKILL.md"
             - "**/commands/*.md"
 
+permissions:
+    contents: read
+    pull-requests: read # gh pr diff
+
 jobs:
     validate:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
-            - uses: oven-sh/setup-bun@v2
+            - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
 
             - name: Install dependencies
               run: cd .github/scripts && bun install yaml
@@ -21,14 +27,17 @@ jobs:
             - name: Get changed frontmatter files
               id: changed
               run: |
-                  FILES=$(gh pr diff ${{ github.event.pull_request.number }} --name-only | grep -E '(agents/.*\.md|skills/.*/SKILL\.md|commands/.*\.md)$' || true)
+                  FILES=$(gh pr diff "$PR_NUMBER" --name-only | grep -E '(agents/.*\.md|skills/.*/SKILL\.md|commands/.*\.md)$' || true)
                   echo "files<<EOF" >> "$GITHUB_OUTPUT"
                   echo "$FILES" >> "$GITHUB_OUTPUT"
                   echo "EOF" >> "$GITHUB_OUTPUT"
               env:
                   GH_TOKEN: ${{ github.token }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
 
             - name: Validate frontmatter
               if: steps.changed.outputs.files != ''
+              env:
+                  FILES: ${{ steps.changed.outputs.files }}
               run: |
-                  echo "${{ steps.changed.outputs.files }}" | xargs bun .github/scripts/validate-frontmatter.ts
+                  echo "$FILES" | xargs bun .github/scripts/validate-frontmatter.ts
