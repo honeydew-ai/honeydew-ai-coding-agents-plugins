@@ -19,16 +19,22 @@ on:
             - "GEMINI.md"
             - ".github/copilot-instructions.md"
 
+permissions:
+    contents: read
+
 jobs:
     validate:
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v7
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+              with:
+                  persist-credentials: false
 
-            - uses: actions/setup-node@v7
+            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
 
+            # Deliberately the latest CLI: the plugin must validate against what users install.
             - name: Install Claude CLI
-              run: npm install -g @anthropic-ai/claude-code@latest
+              run: npm install -g @anthropic-ai/claude-code@latest # zizmor: ignore[adhoc-packages]
 
             - name: Validate plugin
               run: claude plugin validate .
