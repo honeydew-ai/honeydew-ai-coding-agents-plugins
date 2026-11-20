@@ -2,6 +2,12 @@
 
 All notable changes to the Honeydew AI Plugins for Coding Agents are documented in this file.
 
+## [1.4.0] - 2026-11-11
+
+### Added
+
+- **`aggregate-recommendation` skill** — turns query history into aggregate-awareness pre-aggregations. It ranks recurring, costly metric+grain shapes, checks coverage with the aggregate debug report, and builds usage-aligned, entity-key-grained caches on a branch — using the row-reduction ratio so you build only the aggregates that pay off.
+
 ## [1.3.9] - 2026-10-29
 
 ### Changed
